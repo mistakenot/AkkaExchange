@@ -6,7 +6,12 @@ namespace AkkaExchange
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Starting Exchange...");
+
+            using (new System())
+            {
+                Console.ReadLine();
+            }
         }
     }
 }
