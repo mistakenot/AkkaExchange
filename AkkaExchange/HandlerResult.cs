@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using AkkaExchange.Events;
 
-namespace AkkaExchange.Handlers
+namespace AkkaExchange
 {
     public class HandlerResult
     {
@@ -32,6 +31,6 @@ namespace AkkaExchange.Handlers
 
         public static HandlerResult NotFound(object command) => 
             new HandlerResult(
-                $"Event type {command.GetType()} not supported by ExchangeCommandHandler.");
+                $"Event type {command.GetType()} not supported by handler.");
     }
 }

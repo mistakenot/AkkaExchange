@@ -1,7 +1,7 @@
-﻿using System.Collections.Immutable;
-using AkkaExchange.State;
+﻿using AkkaExchange.Orders;
+using System.Collections.Immutable;
 
-namespace AkkaExchange.Events
+namespace AkkaExchange.Matching.Events
 {
     public class BeginMatchOrdersEvent : IEvent
     {

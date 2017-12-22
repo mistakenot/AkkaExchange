@@ -1,6 +1,7 @@
 ﻿namespace AkkaExchange
 {
-    public class OrderMatch
+    public interface ICommand
     {
+        
     }
 }

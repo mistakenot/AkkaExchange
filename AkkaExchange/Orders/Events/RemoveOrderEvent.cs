@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AkkaExchange.Events
+namespace AkkaExchange.Orders.Events
 {
     public class RemoveOrderEvent : IEvent
     {

@@ -1,7 +1,6 @@
 ﻿using System;
-using AkkaExchange.State;
 
-namespace AkkaExchange.Events
+namespace AkkaExchange.Orders.Events
 {
     public class NewOrderEvent : IEvent
     {

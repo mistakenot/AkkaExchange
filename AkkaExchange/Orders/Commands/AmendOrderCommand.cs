@@ -1,9 +1,8 @@
 ﻿using System;
-using AkkaExchange.State;
 
-namespace AkkaExchange.Commands
+namespace AkkaExchange.Orders.Commands
 {
-    public class AmendOrderCommand
+    public class AmendOrderCommand : IOrderCommand
     {
         public Guid OrderId { get; }
         public OrderDetails OrderDetails { get; }

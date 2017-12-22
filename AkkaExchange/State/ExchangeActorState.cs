@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Linq;
-using AkkaExchange.Events;
+using AkkaExchange.Orders;
+using AkkaExchange.Orders.Events;
 
 namespace AkkaExchange.State
 {

@@ -1,25 +1,26 @@
 ﻿using System;
 using Akka.Persistence;
-using AkkaExchange.Events;
-using AkkaExchange.Handlers;
 using AkkaExchange.State;
 
 namespace AkkaExchange.Actors
 {
-    public class BaseActor<TState, THandler> : UntypedPersistentActor
-        where THandler : class, ICommandHandler<TState>
+    public class BaseActor<TState> : UntypedPersistentActor
         where TState : class, IState<TState>
     {
         public override string PersistenceId { get; }
 
-        public BaseActor(THandler handler, TState state, string persistenceId)
+        public BaseActor(
+            ICommandHandler<TState> handler, 
+            TState defaultState, 
+            string persistenceId)
         {
             PersistenceId = persistenceId;
+
             _handler = handler ?? throw new ArgumentNullException(nameof(handler));
-            _state = state ?? throw new ArgumentNullException(nameof(state));
+            _state = defaultState ?? throw new ArgumentNullException(nameof(defaultState));
         }
 
-        private readonly THandler _handler;
+        private readonly ICommandHandler<TState> _handler;
         private TState _state;
 
         protected override void OnCommand(object message)

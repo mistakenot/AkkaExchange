@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using AkkaExchange.State;
+using AkkaExchange.Orders;
 
-namespace AkkaExchange
+namespace AkkaExchange.Matching
 {
     public class OrderMatchResult
     {

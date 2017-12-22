@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace AkkaExchange.Commands
+namespace AkkaExchange.Orders.Commands
 {
-    public class RemoveOrderCommand
+    public class RemoveOrderCommand : IOrderCommand
     {
         public Guid OrderId { get; }
 

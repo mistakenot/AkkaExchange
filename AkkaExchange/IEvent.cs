@@ -1,4 +1,4 @@
-﻿namespace AkkaExchange.Events
+﻿namespace AkkaExchange
 {
     public interface IEvent
     {
