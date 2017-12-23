@@ -7,7 +7,8 @@ namespace AkkaExchange.Matching
 {
     public class OrderMatcher : IOrderMatcher
     {
-        public OrderMatchResult Match(IEnumerable<OrderDetails> orders)
+        public OrderMatchResult Match(
+            IEnumerable<Order> orders)
         {
             var bids = orders
                 .Where(o => o.Side == OrderStateSide.Bid)
@@ -19,36 +20,40 @@ namespace AkkaExchange.Matching
 
             var matches = new List<OrderMatch>();
 
-            var availableBids = new Stack<OrderDetails>(
+            var availableBids = new Stack<Order>(
                 bids.Where(b => 
-                    asks.All(a => b.Price >= a.Price)));
+                    asks.Any(a => b.Price >= a.Price)));
+
+            var availableAsks = new Stack<Order>(
+                asks.Where(a => 
+                    bids.Any(b => b.Price >= a.Price)));
 
             while (availableBids.Any())
             {
                 var bid = availableBids.Pop();
-
-                var availableAsks = new Stack<OrderDetails>(
-                    asks.Where(a => a.Price <= bid.Price));
-
-                var remainingBuy = bid;
-
-                while (remainingBuy.Amount > 0 && availableAsks.Any())
+                
+                while (bid.Amount > 0 && availableAsks.Any() && bid.Amount >= availableAsks.Peek().Price)
                 {
                     var ask = availableAsks.Pop();
 
                     var remainingAskAmount =
-                        ask.Amount >= remainingBuy.Amount ? ask.Amount - remainingBuy.Amount : 0;
+                        ask.Amount >= bid.Amount ? ask.Amount - bid.Amount : 0;
                     var remainingBuyAmount =
-                        ask.Amount >= remainingBuy.Amount ? 0 : remainingBuy.Amount - ask.Amount;
+                        ask.Amount >= bid.Amount ? 0 : bid.Amount - ask.Amount;
 
-                    remainingBuy = new OrderDetails(remainingBuyAmount, remainingBuy.Price, OrderStateSide.Bid);
+                    var matchedBid = bid.WithAmount(bid.Amount - remainingBuyAmount);
+                    var matchedAsk = ask.WithAmount(ask.Amount - remainingAskAmount);
+
+                    matches.Add(new OrderMatch(matchedBid, matchedAsk));
+
+                    bid = bid.WithAmount(remainingBuyAmount);
 
                     if (remainingAskAmount > 0)
                     {
                         availableAsks.Push(
                             ask.WithAmount(remainingAskAmount));
                     }
-                    else
+                    if (remainingBuyAmount > 0)
                     {
                         availableBids.Push(
                             bid.WithAmount(remainingBuyAmount));
@@ -56,8 +61,9 @@ namespace AkkaExchange.Matching
                 }
             }
 
-            return null;
-            
+            return new OrderMatchResult(
+                matches, 
+                availableAsks.Concat(availableBids));
         }
     }
 }

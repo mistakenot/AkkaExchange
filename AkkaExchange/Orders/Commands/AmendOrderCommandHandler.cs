@@ -17,8 +17,7 @@ namespace AkkaExchange.Orders.Commands
 
             return new HandlerResult(
                 new AmendOrderEvent(
-                    command.OrderId,
-                    command.OrderDetails));
+                    command.Order));
         }
     }
 }

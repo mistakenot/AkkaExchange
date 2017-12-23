@@ -1,6 +1,7 @@
-﻿using System;
-using AkkaExchange.Orders.Events;
+﻿using AkkaExchange.Orders.Events;
+using AkkaExchange.Orders.Extensions;
 using AkkaExchange.State;
+using System;
 
 namespace AkkaExchange.Orders.Commands
 {
@@ -10,9 +11,7 @@ namespace AkkaExchange.Orders.Commands
         {
             return new HandlerResult(
                 new NewOrderEvent(
-                    new Order(
-                        Guid.NewGuid(),
-                        command.OrderDetails)));
+                    command.Order.WithOrderId(Guid.NewGuid())));
         }
     }
 }

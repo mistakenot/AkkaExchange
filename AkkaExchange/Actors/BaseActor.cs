@@ -1,6 +1,5 @@
 ﻿using System;
 using Akka.Persistence;
-using AkkaExchange.State;
 
 namespace AkkaExchange.Actors
 {
@@ -45,13 +44,9 @@ namespace AkkaExchange.Actors
             }
         }
 
-        private void OnPersist<T>(T persistedEvent)
+        protected virtual void OnPersist(IEvent persistedEvent)
         {
-            if (persistedEvent is IEvent evnt)
-            {
-                _state = _state.Update(evnt);
-            }
-
+            _state = _state.Update(persistedEvent);
             Sender.Tell(persistedEvent, Self);
         }
     }

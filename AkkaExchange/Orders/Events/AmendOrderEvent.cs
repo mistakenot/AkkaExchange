@@ -4,15 +4,12 @@ namespace AkkaExchange.Orders.Events
 {
     public class AmendOrderEvent : IEvent
     {
-        public Guid OrderId { get; }
-        public OrderDetails OrderDetails { get; }
+        public Order Order { get; }
 
         public AmendOrderEvent(
-            Guid orderId,
-            OrderDetails order)
+            Order order)
         {
-            OrderId = orderId;
-            OrderDetails = order ?? throw new ArgumentNullException(nameof(order));
+            Order = order ?? throw new ArgumentNullException(nameof(order));
         }
     }
 }

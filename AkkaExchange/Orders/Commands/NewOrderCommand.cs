@@ -4,11 +4,11 @@ namespace AkkaExchange.Orders.Commands
 {
     public class NewOrderCommand : IOrderCommand
     {
-        public OrderDetails OrderDetails { get; }
+        public Order Order { get; }
 
-        public NewOrderCommand(OrderDetails orderDetails)
+        public NewOrderCommand(Order order)
         {
-            OrderDetails = orderDetails ?? throw new ArgumentNullException(nameof(orderDetails));
+            Order = order ?? throw new ArgumentNullException(nameof(order));
         }
     }
 }

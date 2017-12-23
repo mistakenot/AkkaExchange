@@ -5,12 +5,12 @@ namespace AkkaExchange.Orders.Commands
     public class AmendOrderCommand : IOrderCommand
     {
         public Guid OrderId { get; }
-        public OrderDetails OrderDetails { get; }
+        public Order Order { get; }
 
-        public AmendOrderCommand(Guid orderId, OrderDetails orderDetails)
+        public AmendOrderCommand(Guid orderId, Order order)
         {
             OrderId = orderId;
-            OrderDetails = orderDetails ?? throw new ArgumentNullException(nameof(orderDetails));
+            Order = order ?? throw new ArgumentNullException(nameof(order));
         }
     }
 }

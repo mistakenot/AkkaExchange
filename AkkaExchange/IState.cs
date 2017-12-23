@@ -1,4 +1,4 @@
-﻿namespace AkkaExchange.State
+﻿namespace AkkaExchange
 {
     public interface IState<out TState>
     {

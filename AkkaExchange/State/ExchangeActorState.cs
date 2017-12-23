@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using AkkaExchange.Orders;
 using AkkaExchange.Orders.Events;
+using AkkaExchange.Orders.Extensions;
 
 namespace AkkaExchange.State
 {
@@ -29,11 +30,10 @@ namespace AkkaExchange.State
             }
             else if (evnt is AmendOrderEvent amendOrderEvent)
             {
-                var oldOrder = Orders.Single(o => o.OrderId == amendOrderEvent.OrderId);
-                var newOrder = new Order(oldOrder.OrderId, amendOrderEvent.OrderDetails);
-
                 return new ExchangeActorState(
-                    Orders.RemoveAll(o => o.OrderId == oldOrder.OrderId).Add(newOrder));
+                    Orders
+                        .RemoveAll(o => o.OrderId == amendOrderEvent.Order.OrderId)
+                        .Add(amendOrderEvent.Order));
             }
 
             return this;

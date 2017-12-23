@@ -5,6 +5,6 @@ namespace AkkaExchange.Matching
 {
     public interface IOrderMatcher
     {
-        OrderMatchResult Match(IEnumerable<OrderDetails> orders);
+        OrderMatchResult Match(IEnumerable<Order> orders);
     }
 }
