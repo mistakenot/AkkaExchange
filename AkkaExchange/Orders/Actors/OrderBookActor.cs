@@ -1,6 +1,7 @@
 ﻿using AkkaExchange.Actors;
 using AkkaExchange.Orders.Commands;
 using AkkaExchange.State;
+using AkkaExchange.Utils;
 
 namespace AkkaExchange.Orders.Actors
 {
@@ -13,7 +14,7 @@ namespace AkkaExchange.Orders.Actors
             : base(
                 OrderCommandHandler.Instance,
                 new ExchangeActorState(),
-                "exchange-actor")
+                Constants.OrderBookPersistenceId)
         {
         }
     }

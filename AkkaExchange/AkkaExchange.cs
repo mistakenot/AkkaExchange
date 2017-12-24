@@ -1,24 +1,31 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Akka.Actor;
+using Akka.DI.AutoFac;
 using Akka.DI.Core;
 using AkkaExchange.Client.Actors;
 using AkkaExchange.Client.Commands;
-using AkkaExchange.Client.Events;
+using Autofac;
 
 namespace AkkaExchange
 {
     public class AkkaExchange : IDisposable
     {
         public ActorSystem System { get; }
-
+        
         private readonly IActorRef _clientManager;
+        private readonly AutoFacDependencyResolver _resolver;
 
-        public AkkaExchange()
+        public AkkaExchange(IContainer container)
         {
             System = ActorSystem.Create("akka-exchange-system");
 
-            _clientManager = System.ActorOf(System.DI().Props<ClientManagerActor>(), "client-manager");
+            var resolver = new AutoFacDependencyResolver(container, System);
+
+            System.AddDependencyResolver(resolver);
+            
+            _clientManager = System.ActorOf(
+                System.DI().Props<ClientManagerActor>(), "client-manager");
         }
 
         public void Dispose()
@@ -30,7 +37,12 @@ namespace AkkaExchange
         {
             var command = new StartConnectionCommand();
             var responseObject = await _clientManager.Ask(command);
-            return new AkkaExchangeClient(responseObject as IActorRef);
+            var inbox = Inbox.Create(System);
+
+            return new AkkaExchangeClient(
+                Guid.NewGuid(),
+                responseObject as IActorRef,
+                inbox);
         }
 
         public async Task EndConnection(Guid connectionId)

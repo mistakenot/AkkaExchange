@@ -14,9 +14,8 @@ namespace AkkaExchange
                 .AddAkkaExchangeDependencies()
                 .Build();
             
-            using (var exchange = new AkkaExchange())
+            using (var exchange = new AkkaExchange(container))
             {
-                var resolver = new AutoFacDependencyResolver(container, exchange.System);
                 var client = exchange.NewConnection();
 
                 Console.ReadLine();
