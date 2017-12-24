@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace AkkaExchange
+namespace AkkaExchange.Utils
 {
     public class HandlerResult
     {

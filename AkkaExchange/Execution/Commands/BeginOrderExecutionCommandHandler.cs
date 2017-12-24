@@ -1,4 +1,5 @@
 ﻿using AkkaExchange.Execution.Events;
+using AkkaExchange.Utils;
 
 namespace AkkaExchange.Execution.Commands
 {
@@ -13,7 +14,7 @@ namespace AkkaExchange.Execution.Commands
             {
                 return new HandlerResult($"Order ID {command.Order.OrderId} is already executing.");
             }
-
+            
             return new HandlerResult(
                 new BeginOrderExecutionEvent(command.Order));
         }

@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Immutable;
 using AkkaExchange.Execution.Events;
-using AkkaExchange.State;
 
 namespace AkkaExchange.Execution
 {
     public class OrderExecutorManagerState : IState<OrderExecutorManagerState>
     {
-        public IImmutableDictionary<Guid, OrderExecutionState> ExecutingObservables { get; }
+        public IImmutableDictionary<Guid, OrderExecutorState> ExecutingObservables { get; }
 
         public OrderExecutorManagerState(
-            IImmutableDictionary<Guid, OrderExecutionState> executingObservables)
+            IImmutableDictionary<Guid, OrderExecutorState> executingObservables)
         {
             ExecutingObservables =
                 executingObservables ?? throw new ArgumentNullException(nameof(executingObservables));
@@ -22,9 +21,12 @@ namespace AkkaExchange.Execution
             {
                 return new OrderExecutorManagerState(
                     ExecutingObservables.Add(
-                        beginOrderExecutionEvent.Order.OrderId, 
-                        new OrderEx));
+                        beginOrderExecutionEvent.Order.OrderId,
+                        new OrderExecutorState(
+                            beginOrderExecutionEvent.Order.OrderId)));
             }
+
+            return this;
         }
     }
 }

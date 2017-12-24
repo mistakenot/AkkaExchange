@@ -7,20 +7,20 @@ namespace AkkaExchange.Execution
 {
     public class DefaultOrderExecutor : IOrderExecutor
     {
-        public IObservable<OrderExecutionStatus> Execute(Order order)
+        public IObservable<OrderExecutorStatus> Execute(Order order)
         {
-            var observer = new Subject<OrderExecutionStatus>();
+            var observer = new Subject<OrderExecutorStatus>();
 
             Task.Run(async () =>
             {
-                observer.OnNext(OrderExecutionStatus.Pending);
+                observer.OnNext(OrderExecutorStatus.Pending);
 
                 // Simulate processing an order.
                 await Task.Delay(100);
-                observer.OnNext(OrderExecutionStatus.InProgress);
+                observer.OnNext(OrderExecutorStatus.InProgress);
 
                 await Task.Delay(250);
-                observer.OnNext(OrderExecutionStatus.Complete);
+                observer.OnNext(OrderExecutorStatus.Complete);
             });
 
             return observer;

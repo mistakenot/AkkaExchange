@@ -1,11 +1,12 @@
 ﻿using AkkaExchange.Execution.Events;
+using AkkaExchange.Utils;
 
 namespace AkkaExchange.Execution.Commands
 {
     public class UpdateOrderExecutionStatusCommandHandler : 
-        BaseCommandHandler<OrderExecutionState, UpdateOrderExecutionStatusCommand>
+        BaseCommandHandler<OrderExecutorState, UpdateOrderExecutionStatusCommand>
     {
-        protected override HandlerResult Handle(OrderExecutionState state, UpdateOrderExecutionStatusCommand command)
+        protected override HandlerResult Handle(OrderExecutorState state, UpdateOrderExecutionStatusCommand command)
         {
             if (state.OrderId != command.OrderId)
             {
@@ -13,7 +14,7 @@ namespace AkkaExchange.Execution.Commands
             }
 
             if (command.Status < state.Status ||
-                command.Status == OrderExecutionStatus.Error && state.Status == OrderExecutionStatus.Complete)
+                command.Status == OrderExecutorStatus.Error && state.Status == OrderExecutorStatus.Complete)
             {
                 return new HandlerResult($"Order status {command.Status} cannot come after {state.Status}.");
             }

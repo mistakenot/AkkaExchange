@@ -32,7 +32,7 @@ namespace AkkaExchange.Actors
             }
             else
             {
-                // Send errors to client.
+                // TODO send errors to client
             }
         }
 

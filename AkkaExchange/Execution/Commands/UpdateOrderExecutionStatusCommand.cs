@@ -4,11 +4,11 @@ namespace AkkaExchange.Execution.Commands
 {
     public class UpdateOrderExecutionStatusCommand : ICommand
     {
-        public OrderExecutionStatus Status { get; }
+        public OrderExecutorStatus Status { get; }
         public Guid OrderId { get; }
 
         public UpdateOrderExecutionStatusCommand(
-            OrderExecutionStatus status, 
+            OrderExecutorStatus status, 
             Guid orderId)
         {
             Status = status;

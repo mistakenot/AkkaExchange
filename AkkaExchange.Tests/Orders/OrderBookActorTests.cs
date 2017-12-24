@@ -1,3 +1,4 @@
+using System;
 using Akka.Actor;
 using Akka.TestKit;
 using Akka.TestKit.Xunit2;
@@ -6,10 +7,9 @@ using AkkaExchange.Orders.Actors;
 using AkkaExchange.Orders.Commands;
 using AkkaExchange.Orders.Events;
 using AkkaExchange.Orders.Extensions;
-using System;
 using Xunit;
 
-namespace AkkaExchange.Tests
+namespace AkkaExchange.Tests.Orders
 {
     public class OrderBookActorTests : TestKit
     {

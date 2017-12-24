@@ -11,9 +11,4 @@ namespace AkkaExchange.Matching.Commands
             MatchedOrders = matchedOrders ?? throw new ArgumentNullException(nameof(matchedOrders));
         }
     }
-
-    public class CompleteMatchOrdersCommandHandler : BaseCommandHandler<CompleteMatchOrdersCommand, float>
-    {
-        
-    }
 }

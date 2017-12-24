@@ -6,16 +6,15 @@ using AkkaExchange.Execution.Events;
 
 namespace AkkaExchange.Execution.Actors
 {
-    public class OrderExecutorActor : BaseActor<OrderExecutionState>
+    public class OrderExecutorActor : BaseActor<OrderExecutorState>
     {
         private readonly IOrderExecutor _orderExecutor;
         private readonly IDictionary<Guid, IDisposable> _orderExecutionEventSubscriptions;
 
         public OrderExecutorActor(
             IOrderExecutor orderExecutor,
-            ICommandHandler<OrderExecutionState> handler, 
-            OrderExecutionState defaultState, 
-            string persistenceId) : base(handler, defaultState, persistenceId)
+            ICommandHandler<OrderExecutorState> handler, 
+            OrderExecutorState defaultState) : base(handler, defaultState, defaultState.OrderId.ToString())
         {
             _orderExecutor = orderExecutor;
             _orderExecutionEventSubscriptions = new Dictionary<Guid, IDisposable>();

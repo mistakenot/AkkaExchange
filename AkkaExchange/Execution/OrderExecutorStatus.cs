@@ -1,6 +1,6 @@
 ﻿namespace AkkaExchange.Execution
 {
-    public enum OrderExecutionStatus
+    public enum OrderExecutorStatus
     {
         Pending = 0,
         InProgress = 1,

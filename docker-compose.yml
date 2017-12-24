@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  akkaexchange.web:
+    image: akkaexchange.web
+    build:
+      context: .
+      dockerfile: AkkaExchange.Web/Dockerfile

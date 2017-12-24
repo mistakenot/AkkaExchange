@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using AkkaExchange.Orders.Events;
 using AkkaExchange.State;
+using AkkaExchange.Utils;
 
 namespace AkkaExchange.Orders.Commands
 {

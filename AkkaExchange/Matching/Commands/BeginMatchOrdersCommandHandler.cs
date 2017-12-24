@@ -1,5 +1,6 @@
 ﻿using AkkaExchange.Matching.Events;
 using AkkaExchange.State;
+using AkkaExchange.Utils;
 
 namespace AkkaExchange.Matching.Commands
 {

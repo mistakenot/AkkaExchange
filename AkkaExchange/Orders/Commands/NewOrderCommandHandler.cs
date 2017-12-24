@@ -2,6 +2,7 @@
 using AkkaExchange.Orders.Extensions;
 using AkkaExchange.State;
 using System;
+using AkkaExchange.Utils;
 
 namespace AkkaExchange.Orders.Commands
 {

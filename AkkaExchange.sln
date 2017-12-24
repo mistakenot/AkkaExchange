@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AkkaExchange", "AkkaExchang
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AkkaExchange.Tests", "AkkaExchange.Tests\AkkaExchange.Tests.csproj", "{E1C625A3-BD7E-415E-8643-528240B230D2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AkkaExchange.Web", "AkkaExchange.Web\AkkaExchange.Web.csproj", "{1FA7B9E3-F9B1-46D9-8054-05EF6250BDFF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{E1C625A3-BD7E-415E-8643-528240B230D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E1C625A3-BD7E-415E-8643-528240B230D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E1C625A3-BD7E-415E-8643-528240B230D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FA7B9E3-F9B1-46D9-8054-05EF6250BDFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FA7B9E3-F9B1-46D9-8054-05EF6250BDFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FA7B9E3-F9B1-46D9-8054-05EF6250BDFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FA7B9E3-F9B1-46D9-8054-05EF6250BDFF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
