@@ -1,6 +1,8 @@
 ﻿using AkkaExchange.Client;
 using AkkaExchange.Client.Actors;
-using AkkaExchange.Client.Commands;
+using AkkaExchange.Execution.Actors;
+using AkkaExchange.Orders;
+using AkkaExchange.Orders.Actors;
 using Autofac;
 
 namespace AkkaExchange.Utils
@@ -10,9 +12,15 @@ namespace AkkaExchange.Utils
         public static ContainerBuilder AddAkkaExchangeDependencies(this ContainerBuilder builder)
         {
             builder.RegisterType<ClientActor>();
-            builder.RegisterType<ClientActorStartConnectionCommandHandler>().As<ICommandHandler<ClientState>>();
+            builder.RegisterType<ClientHandler>().As<ICommandHandler<ClientState>>();
+
             builder.RegisterType<ClientManagerActor>();
-            builder.RegisterType<ClientManagerCommandHandler>().As<ICommandHandler<ClientManagerState>>();
+            builder.RegisterType<ClientManagerHandler>().As<ICommandHandler<ClientManagerState>>();
+
+            builder.RegisterType<OrderBookActor>();
+            builder.RegisterType<OrderBookHandler>().As<ICommandHandler<OrderBookState>>();
+
+            builder.RegisterType<OrderExecutorActor>();
 
             return builder;
         }

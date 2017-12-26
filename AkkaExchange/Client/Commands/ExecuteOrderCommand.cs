@@ -5,9 +5,9 @@ namespace AkkaExchange.Client.Commands
     public class ExecuteOrderCommand : ICommand
     {
         public Guid ClientId { get; }
-        public dynamic OrderCommand { get; }
+        public ICommand OrderCommand { get; }
 
-        public ExecuteOrderCommand(Guid clientId, dynamic orderCommand)
+        public ExecuteOrderCommand(Guid clientId, ICommand orderCommand)
         {
             ClientId = clientId;
             OrderCommand = orderCommand ?? throw new ArgumentNullException(nameof(orderCommand));

@@ -3,7 +3,6 @@ using Akka.Actor;
 using Akka.TestKit;
 using Akka.TestKit.Xunit2;
 using AkkaExchange.Orders;
-using AkkaExchange.Orders.Actors;
 using AkkaExchange.Orders.Commands;
 using AkkaExchange.Orders.Events;
 using AkkaExchange.Orders.Extensions;
@@ -18,7 +17,6 @@ namespace AkkaExchange.Tests.Orders
         
         public OrderBookActorTests()
         {
-            _subject = this.Sys.ActorOf<OrderBookActor>();
             _probe = this.CreateTestProbe();
         }
         
@@ -28,7 +26,7 @@ namespace AkkaExchange.Tests.Orders
             Within(TimeSpan.FromSeconds(1), () =>
             {
                 var msg = new NewOrderCommand(
-                    new Order(Guid.Empty, 1m, 1m, OrderStateSide.Bid));
+                    new Order(Guid.Empty, 1m, 1m, OrderSide.Bid));
                 
                 _subject.Tell(msg, _probe.Ref);
                 AwaitCondition(() => _probe.HasMessages);
@@ -47,7 +45,7 @@ namespace AkkaExchange.Tests.Orders
             Within(TimeSpan.FromSeconds(1), () =>
             {
                 var newOrderCommand = new NewOrderCommand(
-                    new Order(Guid.Empty, 1m, 1m, OrderStateSide.Ask));
+                    new Order(Guid.Empty, 1m, 1m, OrderSide.Ask));
 
                 _subject.Tell(newOrderCommand, _probe.Ref);
                 AwaitCondition(() => _probe.HasMessages);
@@ -67,7 +65,7 @@ namespace AkkaExchange.Tests.Orders
             Within(TimeSpan.FromSeconds(2), () =>
             {
                 var newOrderCommand = new NewOrderCommand(
-                    new Order(Guid.Empty, 1m, 1m, OrderStateSide.Bid));
+                    new Order(Guid.Empty, 1m, 1m, OrderSide.Bid));
 
                 _subject.Tell(newOrderCommand, _probe.Ref);
                 AwaitCondition(() => _probe.HasMessages);
@@ -92,7 +90,7 @@ namespace AkkaExchange.Tests.Orders
             Within(TimeSpan.FromSeconds(2), () =>
             {
                 var newOrderCommand = new NewOrderCommand(
-                    new Order(Guid.Empty, 1m, 1m, OrderStateSide.Bid));
+                    new Order(Guid.Empty, 1m, 1m, OrderSide.Bid));
 
                 _subject.Tell(newOrderCommand, _probe.Ref);
                 AwaitCondition(() => _probe.HasMessages);

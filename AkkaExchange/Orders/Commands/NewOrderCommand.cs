@@ -2,7 +2,7 @@
 
 namespace AkkaExchange.Orders.Commands
 {
-    public class NewOrderCommand : IOrderCommand
+    public class NewOrderCommand : ICommand
     {
         public Order Order { get; }
 

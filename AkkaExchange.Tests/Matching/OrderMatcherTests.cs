@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using AkkaExchange.Matching;
 using AkkaExchange.Orders;
 using Xunit;
 
@@ -11,11 +10,11 @@ namespace AkkaExchange.Tests.Matching
         [Fact]
         public void OrderMatcher_TwoEqualOrders_MatchOk()
         {
-            var matcher = new OrderMatcher();
+            var matcher = new DefaultOrderMatcher();
             var orders = new[]
             {
-                new Order(Guid.NewGuid(), Guid.Empty, 1, 1, OrderStateSide.Ask),
-                new Order(Guid.NewGuid(), Guid.Empty, 1, 1, OrderStateSide.Bid)
+                new Order(Guid.NewGuid(), Guid.Empty, 1, 1, OrderSide.Ask),
+                new Order(Guid.NewGuid(), Guid.Empty, 1, 1, OrderSide.Bid)
             };
 
             var result = matcher.Match(orders);
@@ -27,12 +26,12 @@ namespace AkkaExchange.Tests.Matching
         // [Fact]
         public void OrderMatcher_TwoUnerualOrders_MatchOk()
         {
-            var matcher =  new OrderMatcher();
+            var matcher =  new DefaultOrderMatcher();
             var orders = new[]
             {
-                new Order(Guid.NewGuid(), Guid.Empty, 1.5m, 1, OrderStateSide.Ask),
-                new Order(Guid.NewGuid(), Guid.Empty, 1, 1, OrderStateSide.Bid),
-                new Order(Guid.NewGuid(), Guid.Empty, 1, 1, OrderStateSide.Bid)
+                new Order(Guid.NewGuid(), Guid.Empty, 1.5m, 1, OrderSide.Ask),
+                new Order(Guid.NewGuid(), Guid.Empty, 1, 1, OrderSide.Bid),
+                new Order(Guid.NewGuid(), Guid.Empty, 1, 1, OrderSide.Bid)
             };
 
             var result = matcher.Match(orders);

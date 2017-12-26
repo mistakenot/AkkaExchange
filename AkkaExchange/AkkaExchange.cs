@@ -1,8 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Akka.Actor;
+using Akka.Configuration;
 using Akka.DI.AutoFac;
 using Akka.DI.Core;
+using Akka.Persistence.Query;
+using Akka.Persistence.Query.Sql;
+using Akka.Streams;
+using Akka.Streams.Dsl;
 using AkkaExchange.Client.Actors;
 using AkkaExchange.Client.Commands;
 using Autofac;
@@ -11,37 +16,59 @@ namespace AkkaExchange
 {
     public class AkkaExchange : IDisposable
     {
-        public ActorSystem System { get; }
-        
+        private readonly ActorSystem _system;
+        private readonly SqlReadJournal _readJournal;
         private readonly IActorRef _clientManager;
-        private readonly AutoFacDependencyResolver _resolver;
+        private readonly ActorMaterializer _materializer;
+        private Task _source;
 
-        public AkkaExchange(IContainer container)
+        public AkkaExchange(IContainer container, Config config)
         {
-            System = ActorSystem.Create("akka-exchange-system");
+            _system = ActorSystem.Create("akka-exchange-system", config);
+            _system.AddDependencyResolver(
+                new AutoFacDependencyResolver(container, _system));
 
-            var resolver = new AutoFacDependencyResolver(container, System);
+            _materializer = ActorMaterializer.Create(_system);
+            _readJournal = PersistenceQuery.Get(_system).ReadJournalFor<SqlReadJournal>("akka.persistence.query.journal.sql");
 
-            System.AddDependencyResolver(resolver);
-            
-            _clientManager = System.ActorOf(
-                System.DI().Props<ClientManagerActor>(), "client-manager");
+            _source = _readJournal.PersistenceIds().RunForeach(id =>
+            {
+                Console.WriteLine(id);
+            }, _materializer);
+
+            var props = _system.DI().Props<ClientManagerActor>();
+
+            _clientManager = _system.ActorOf(
+                props, "client-manager");
         }
 
         public void Dispose()
         {
-            System.Dispose();
+            _system.Dispose();
         }
 
         public async Task<AkkaExchangeClient> NewConnection()
         {
             var command = new StartConnectionCommand();
-            var responseObject = await _clientManager.Ask(command);
-            var inbox = Inbox.Create(System);
+            var inbox = Inbox.Create(_system);
+
+            _clientManager.Tell(command, inbox.Receiver);
+
+            var clientActor = await inbox.ReceiveAsync();
+
+            var eventsSource = _readJournal.EventsByPersistenceId(
+                command.ClientId.ToString(),
+                0L,
+                long.MaxValue);
+
+            var subscription = eventsSource
+                .Select(env => env.Event)
+                .RunForeach(e => inbox.Receiver.Tell(e), _materializer);
 
             return new AkkaExchangeClient(
-                Guid.NewGuid(),
-                responseObject as IActorRef,
+                command.ClientId,
+                clientActor as IActorRef,
+                subscription,
                 inbox);
         }
 

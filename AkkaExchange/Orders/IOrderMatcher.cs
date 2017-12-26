@@ -1,37 +1,41 @@
-﻿using System.Collections.Generic;
+﻿using AkkaExchange.Orders.Extensions;
+using System.Collections.Generic;
 using System.Linq;
-using AkkaExchange.Orders;
-using AkkaExchange.Orders.Extensions;
 
-namespace AkkaExchange.Matching
+namespace AkkaExchange.Orders
 {
-    public class OrderMatcher : IOrderMatcher
+    public interface IOrderMatcher
+    {
+        OrderMatchResult Match(IEnumerable<Order> orders);
+    }
+
+    public class DefaultOrderMatcher : IOrderMatcher
     {
         public OrderMatchResult Match(
             IEnumerable<Order> orders)
         {
             var bids = orders
-                .Where(o => o.Side == OrderStateSide.Bid)
+                .Where(o => o.Side == OrderSide.Bid)
                 .OrderByDescending(o => o.Price);
 
             var asks = orders
-                .Where(o => o.Side == OrderStateSide.Ask)
+                .Where(o => o.Side == OrderSide.Ask)
                 .OrderBy(o => o.Price);
 
             var matches = new List<OrderMatch>();
 
             var availableBids = new Stack<Order>(
-                bids.Where(b => 
+                bids.Where(b =>
                     asks.Any(a => b.Price >= a.Price)));
 
             var availableAsks = new Stack<Order>(
-                asks.Where(a => 
+                asks.Where(a =>
                     bids.Any(b => b.Price >= a.Price)));
 
             while (availableBids.Any())
             {
                 var bid = availableBids.Pop();
-                
+
                 while (bid.Amount > 0 && availableAsks.Any() && bid.Amount >= availableAsks.Peek().Price)
                 {
                     var ask = availableAsks.Pop();
@@ -62,7 +66,7 @@ namespace AkkaExchange.Matching
             }
 
             return new OrderMatchResult(
-                matches, 
+                matches,
                 availableAsks.Concat(availableBids));
         }
     }

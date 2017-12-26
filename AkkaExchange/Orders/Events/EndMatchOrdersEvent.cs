@@ -1,12 +1,12 @@
 ﻿using System;
 
-namespace AkkaExchange.Matching.Commands
+namespace AkkaExchange.Orders.Events
 {
-    public class CompleteMatchOrdersCommand : ICommand
+    public class EndMatchOrdersEvent : IEvent
     {
         public OrderMatchResult MatchedOrders { get; }
 
-        public CompleteMatchOrdersCommand(OrderMatchResult matchedOrders)
+        public EndMatchOrdersEvent(OrderMatchResult matchedOrders)
         {
             MatchedOrders = matchedOrders ?? throw new ArgumentNullException(nameof(matchedOrders));
         }

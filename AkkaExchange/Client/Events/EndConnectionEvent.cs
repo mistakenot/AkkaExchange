@@ -9,6 +9,12 @@ namespace AkkaExchange.Client.Events
 
         public string ClientName => ClientId.ToString();
 
+        public EndConnectionEvent(Guid clientId)
+            : this(clientId, DateTime.UtcNow)
+        {
+            
+        }
+
         public EndConnectionEvent(Guid clientId, DateTime endedAt)
         {
             ClientId = clientId;

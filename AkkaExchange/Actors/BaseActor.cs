@@ -24,15 +24,18 @@ namespace AkkaExchange.Actors
 
         protected override void OnCommand(object message)
         {
-            var handlerResult = _handler.Handle(_state, message);
+            if (message is ICommand command)
+            {
+                var handlerResult = _handler.Handle(_state, command);
 
-            if (handlerResult.Success)
-            {
-                Persist(handlerResult.Event, OnPersist);
-            }
-            else
-            {
-                // TODO send errors to client
+                if (handlerResult.Success)
+                {
+                    Persist(handlerResult.Event, OnPersist);
+                }
+                else
+                {
+                    // TODO send errors to client
+                }
             }
         }
 
@@ -47,7 +50,7 @@ namespace AkkaExchange.Actors
         protected virtual void OnPersist(IEvent persistedEvent)
         {
             _state = _state.Update(persistedEvent);
-            Sender.Tell(persistedEvent, Self);
+            // Sender.Tell(persistedEvent, Self);
         }
     }
 }

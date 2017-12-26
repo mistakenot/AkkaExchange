@@ -1,5 +1,7 @@
 ﻿using System;
-using Akka.DI.AutoFac;
+using System.IO;
+using Akka.Configuration;
+using AkkaExchange.Orders;
 using AkkaExchange.Utils;
 
 namespace AkkaExchange
@@ -13,13 +15,26 @@ namespace AkkaExchange
             var container = new Autofac.ContainerBuilder()
                 .AddAkkaExchangeDependencies()
                 .Build();
-            
-            using (var exchange = new AkkaExchange(container))
+
+            var configString = File.ReadAllText("config.txt");
+            var config = ConfigurationFactory.ParseString(configString);
+
+            using (var exchange = new AkkaExchange(container, config))
             {
-                var client = exchange.NewConnection();
+                var client = exchange.NewConnection().Result;
+                var clientSubscription = client.Events.Subscribe(e =>
+                {
+                    Console.WriteLine($"Client has received event: {e}");
+                });
+
+                client.NewOrder(1m, 1m, OrderSide.Ask);
+                client.NewOrder(2m, 2m, OrderSide.Bid);
 
                 Console.ReadLine();
+
+                clientSubscription.Dispose();
             }
+
         }
     }
 }

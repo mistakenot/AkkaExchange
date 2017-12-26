@@ -35,7 +35,7 @@ namespace AkkaExchange.Tests.Execution
                 var subject = Sys.ActorOf(props);
 
                 subject.Tell(
-                    new BeginOrderExecutionCommand(),
+                    new BeginOrderExecutionCommand(null),
                     Probe);
 
                 WaitForOne<BeginOrderExecutionEvent>();

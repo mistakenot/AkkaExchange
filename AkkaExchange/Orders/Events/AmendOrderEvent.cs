@@ -6,8 +6,7 @@ namespace AkkaExchange.Orders.Events
     {
         public Order Order { get; }
 
-        public AmendOrderEvent(
-            Order order)
+        public AmendOrderEvent(Order order)
         {
             Order = order ?? throw new ArgumentNullException(nameof(order));
         }

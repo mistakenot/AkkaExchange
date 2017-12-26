@@ -1,8 +1,7 @@
-﻿using AkkaExchange.Orders;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace AkkaExchange.Matching
+namespace AkkaExchange.Orders
 {
     public class OrderMatch
     {

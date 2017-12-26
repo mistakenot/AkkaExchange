@@ -31,7 +31,7 @@ namespace AkkaExchange.Client
                     ClientIds.Remove(endConnectionEvent.ClientId));
             }
 
-            throw new System.NotImplementedException();
+            return this;
         }
     }
 }

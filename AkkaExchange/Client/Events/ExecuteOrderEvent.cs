@@ -2,15 +2,15 @@
 
 namespace AkkaExchange.Client.Events
 {
-    public class ExecuteOrderEvent
+    public class ExecuteOrderEvent : IEvent
     {
         public Guid ClientId { get; }
-        public dynamic OrderEvent { get; }
+        public ICommand OrderCommand { get; }
 
-        public ExecuteOrderEvent(Guid clientId, dynamic orderEvent)
+        public ExecuteOrderEvent(Guid clientId, ICommand orderCommand)
         {
             ClientId = clientId;
-            OrderEvent = orderEvent ?? throw new ArgumentNullException(nameof(orderEvent));
+            OrderCommand = orderCommand ?? throw new ArgumentNullException(nameof(orderCommand));
         }
     }
 }
