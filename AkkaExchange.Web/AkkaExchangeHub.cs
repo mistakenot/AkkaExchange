@@ -5,9 +5,9 @@ namespace AkkaExchange.Web
 {
     public class AkkaExchangeHub : Hub
     {
-        public override Task OnConnectedAsync()
+        public AkkaExchangeHub()
         {
-            return base.OnConnectedAsync();
+            // _akkaExchange = akkaExchange;
         }
     }
 }
