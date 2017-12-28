@@ -39,7 +39,6 @@ namespace AkkaExchange
 
             _clientStateQueryFactory = new StateQueryFactory<ClientState>(readJournal, materializer, ClientState.Empty);
 
-
             _source = readJournal.PersistenceIds().RunForeach(id =>
             {
                 Console.WriteLine(id);
@@ -66,18 +65,21 @@ namespace AkkaExchange
         public async Task<AkkaExchangeClient> NewConnection()
         {
             var command = new StartConnectionCommand();
+            var persistenceId = command.ClientId.ToString();
             var inbox = Inbox.Create(_system);
 
             _clientManager.Tell(command, inbox.Receiver);
 
             var clientActor = await inbox.ReceiveAsync();
-            var eventsQuery = _eventsQueryFactory.Create(command.ClientId.ToString());
+            var eventsQuery = _eventsQueryFactory.Create(persistenceId);
+            var stateQuery = _clientStateQueryFactory.Create(persistenceId);
 
             return new AkkaExchangeClient(
                 command.ClientId,
                 inbox,
                 clientActor as IActorRef,
-                eventsQuery);
+                eventsQuery,
+                stateQuery);
         }
 
         public async Task EndConnection(Guid connectionId)

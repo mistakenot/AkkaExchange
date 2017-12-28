@@ -36,8 +36,7 @@ namespace AkkaExchange.Web
 
         public bool TryDispose(string connectionId)
         {
-            IDisposable sub;
-            if (Subscriptions.TryRemove(connectionId, out sub))
+            if (Subscriptions.TryRemove(connectionId, out var sub))
             {
                 sub.Dispose();
                 return true;

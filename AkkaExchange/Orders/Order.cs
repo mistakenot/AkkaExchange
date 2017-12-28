@@ -9,14 +9,15 @@ namespace AkkaExchange.Orders
         public OrderSide Side { get; }
         public Guid ClientId { get; }
         public Guid OrderId { get; }
+        public DateTime PlacedAt { get; }
 
         public Order(Guid clientId, decimal amount, decimal price, OrderSide side)
-            : this(clientId, Guid.NewGuid(), amount, price, side)
+            : this(clientId, Guid.NewGuid(), amount, price, side, DateTime.UtcNow)
         {
             
         }
 
-        public Order(Guid clientId, Guid orderId, decimal amount, decimal price, OrderSide side)
+        public Order(Guid clientId, Guid orderId, decimal amount, decimal price, OrderSide side, DateTime placedAt)
         {
             if (amount < 0m) throw new ArgumentException("Amount must be > 0.");
             if (price < 0m) throw new ArgumentException("Price must be > 0.");
@@ -24,6 +25,7 @@ namespace AkkaExchange.Orders
             Amount = amount;
             Price = price;
             Side = side;
+            PlacedAt = placedAt;
             ClientId = clientId;
             OrderId = orderId;
         }
