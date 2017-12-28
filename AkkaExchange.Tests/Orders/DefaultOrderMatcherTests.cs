@@ -5,7 +5,7 @@ using Xunit;
 
 namespace AkkaExchange.Tests.Orders
 {
-    public class DefaultOrderMatcherTests
+    public class DefaultOrderMatcherTests : OrderFixture
     {
         private readonly DefaultOrderMatcher _subject;
 
@@ -241,13 +241,5 @@ namespace AkkaExchange.Tests.Orders
                 Assert.Equal(0.5m, r.Bid.Amount);
             });
         }
-
-        private static PlacedOrder Ask(decimal amount, decimal price)
-            => new PlacedOrder(
-                new Order(Guid.NewGuid(), amount, price, OrderSide.Ask));
-
-        private static PlacedOrder Bid(decimal amount, decimal price)
-            => new PlacedOrder(
-                new Order(Guid.NewGuid(), amount, price, OrderSide.Bid));
     }
 }

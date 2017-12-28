@@ -11,6 +11,7 @@ using AkkaExchange.Client;
 using AkkaExchange.Client.Actors;
 using AkkaExchange.Client.Commands;
 using AkkaExchange.Orders.Actors;
+using AkkaExchange.Orders.Commands;
 using AkkaExchange.Shared.Queries;
 using Autofac;
 
@@ -39,10 +40,7 @@ namespace AkkaExchange
 
             _clientStateQueryFactory = new StateQueryFactory<ClientState>(readJournal, materializer, ClientState.Empty);
 
-            _source = readJournal.PersistenceIds().RunForeach(id =>
-            {
-                Console.WriteLine(id);
-            }, materializer);
+            _source = readJournal.PersistenceIds().RunForeach(Console.WriteLine, materializer);
             
             _clientManager = _system.ActorOf(
                 _system.DI().Props<ClientManagerActor>(), 
@@ -51,6 +49,16 @@ namespace AkkaExchange
             _orderBook = _system.ActorOf(
                 _system.DI().Props<OrderBookActor>(),
                 "order-book");
+
+            // Match orders every second.
+            _system
+                .Scheduler
+                .ScheduleTellRepeatedly(
+                    TimeSpan.Zero,
+                    TimeSpan.FromSeconds(1),
+                    _orderBook,
+                    new MatchOrdersCommand(),
+                    ActorRefs.NoSender);
 
             _eventsQueryFactory = new EventsQueryFactory(readJournal, materializer);
 

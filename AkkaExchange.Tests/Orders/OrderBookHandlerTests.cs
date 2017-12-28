@@ -5,13 +5,12 @@ using AkkaExchange.Orders;
 using AkkaExchange.Orders.Commands;
 using AkkaExchange.Orders.Events;
 using AkkaExchange.Orders.Extensions;
-using AkkaExchange.Utils;
 using Moq;
 using Xunit;
 
 namespace AkkaExchange.Tests.Orders
 {
-    public class OrderBookHandlerTests
+    public class OrderBookHandlerTests : OrderFixture
     {
         private readonly Mock<IOrderMatcher> _matcherMock;
         private readonly OrderBookHandler _subject;
@@ -72,14 +71,6 @@ namespace AkkaExchange.Tests.Orders
 
             var evnt = AssertSuccess<RemoveOrderEvent>(result);
             Assert.Equal(placedOrder.OrderId, evnt.OrderId);
-        }
-
-        private static TEvent AssertSuccess<TEvent>(HandlerResult result)
-        {
-            Assert.True(result.Success);
-            Assert.True(result.WasHandled);
-            Assert.Empty(result.Errors);
-            return Assert.IsType<TEvent>(result.Event);
         }
     }
 }

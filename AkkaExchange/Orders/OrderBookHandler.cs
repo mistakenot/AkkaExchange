@@ -19,7 +19,7 @@ namespace AkkaExchange.Orders
         {
             if (command is AmendOrderCommand amendOrderCommand)
             {
-                var order = state.PendingOrders.FirstOrDefault(o => o.OrderId == amendOrderCommand.OrderId);
+                var order = state.OpenOrders.FirstOrDefault(o => o.OrderId == amendOrderCommand.OrderId);
 
                 if (order == null)
                 {
@@ -46,7 +46,7 @@ namespace AkkaExchange.Orders
 
             if (command is RemoveOrderCommand removeOrderCommand)
             {
-                if (state.PendingOrders.Any(o => o.OrderId == removeOrderCommand.OrderId))
+                if (state.OpenOrders.Any(o => o.OrderId == removeOrderCommand.OrderId))
                 {
                     return new HandlerResult(
                         new RemoveOrderEvent(
@@ -60,10 +60,12 @@ namespace AkkaExchange.Orders
 
             if (command is MatchOrdersCommand)
             {
-                var result = _orderMatcher.Match(state.PendingOrders);
+                var result = _orderMatcher.Match(state.OpenOrders);
 
                 return new HandlerResult(
-                    new MatchedOrdersEvent(result));
+                    new MatchedOrdersEvent(
+                        result, 
+                        typeof(DefaultOrderMatcher).FullName));
             }
 
             return HandlerResult.NotHandled;
