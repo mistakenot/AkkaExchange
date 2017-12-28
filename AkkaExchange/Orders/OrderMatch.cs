@@ -1,25 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace AkkaExchange.Orders
 {
     public class OrderMatch
     {
-        public IEnumerable<Order> Bids { get; }
-        public IEnumerable<Order> Asks { get; }
+        public PlacedOrder Bid { get; }
+        public PlacedOrder Ask { get; }
 
-        public OrderMatch(
-            IEnumerable<Order> bids, 
-            IEnumerable<Order> asks)
+        public OrderMatch(PlacedOrder bid, PlacedOrder ask)
         {
-            Bids = bids ?? throw new ArgumentNullException(nameof(bids));
-            Asks = asks ?? throw new ArgumentNullException(nameof(asks));
-        }
-
-        public OrderMatch(Order bid, Order ask)
-            : this(new [] { bid }, new [] { ask })
-        {
-            
+            Ask = ask ?? throw new ArgumentNullException(nameof(ask));
+            Bid = bid ?? throw new ArgumentNullException(nameof(bid));
         }
     }
 }
