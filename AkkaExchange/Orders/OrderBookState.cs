@@ -30,7 +30,7 @@ namespace AkkaExchange.Orders
             {
                 return new OrderBookState(
                     PendingOrders
-                        .RemoveAll(o => o.Details.OrderId == amendOrderEvent.Order.Details.OrderId)
+                        .RemoveAll(o => o.OrderId == amendOrderEvent.Order.OrderId)
                         .Add(amendOrderEvent.Order),
                     ExecutingOrders);
             }

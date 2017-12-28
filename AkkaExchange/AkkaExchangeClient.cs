@@ -47,7 +47,7 @@ namespace AkkaExchange
                 _clientId,
                 new AmendOrderCommand(
                     orderId,
-                    new Order(_clientId, orderId, amount, price, side)));
+                    new Order(_clientId, amount, price, side)));
 
             _clientActor.Tell(command, _inbox.Receiver);
         }

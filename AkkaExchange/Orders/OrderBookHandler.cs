@@ -2,7 +2,6 @@
 using System.Linq;
 using AkkaExchange.Orders.Commands;
 using AkkaExchange.Orders.Events;
-using AkkaExchange.Orders.Extensions;
 using AkkaExchange.Utils;
 
 namespace AkkaExchange.Orders
@@ -20,7 +19,7 @@ namespace AkkaExchange.Orders
         {
             if (command is AmendOrderCommand amendOrderCommand)
             {
-                var order = state.PendingOrders.FirstOrDefault(o => o.Details.OrderId == amendOrderCommand.OrderId);
+                var order = state.PendingOrders.FirstOrDefault(o => o.OrderId == amendOrderCommand.OrderId);
 
                 if (order == null)
                 {
@@ -29,7 +28,10 @@ namespace AkkaExchange.Orders
 
                 return new HandlerResult(
                     new AmendOrderEvent(
-                        new PlacedOrder(amendOrderCommand.Order, order.PlacedAt)));
+                        new PlacedOrder(
+                            amendOrderCommand.Order, 
+                            order.PlacedAt, 
+                            order.OrderId)));
             }
 
             if (command is NewOrderCommand newOrderCommand)
@@ -37,13 +39,14 @@ namespace AkkaExchange.Orders
                 return new HandlerResult(
                     new NewOrderEvent(
                         new PlacedOrder(
-                            newOrderCommand.Order.WithOrderId(Guid.NewGuid()),
-                            DateTime.UtcNow)));
+                            newOrderCommand.Order,
+                            DateTime.UtcNow,
+                            Guid.NewGuid())));
             }
 
             if (command is RemoveOrderCommand removeOrderCommand)
             {
-                if (state.PendingOrders.Any(o => o.Details.OrderId == removeOrderCommand.OrderId))
+                if (state.PendingOrders.Any(o => o.OrderId == removeOrderCommand.OrderId))
                 {
                     return new HandlerResult(
                         new RemoveOrderEvent(
@@ -57,7 +60,10 @@ namespace AkkaExchange.Orders
 
             if (command is MatchOrdersCommand)
             {
-                
+                var result = _orderMatcher.Match(state.PendingOrders);
+
+                return new HandlerResult(
+                    new MatchedOrdersEvent(result));
             }
 
             return HandlerResult.NotHandled;

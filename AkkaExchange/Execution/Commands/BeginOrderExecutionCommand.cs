@@ -5,9 +5,9 @@ namespace AkkaExchange.Execution.Commands
 {
     public class BeginOrderExecutionCommand : ICommand
     {
-        public Order Order { get; }
+        public PlacedOrder Order { get; }
 
-        public BeginOrderExecutionCommand(Order order)
+        public BeginOrderExecutionCommand(PlacedOrder order)
         {
             Order = order ?? throw new ArgumentNullException(nameof(order));
         }

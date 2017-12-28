@@ -19,7 +19,7 @@ namespace AkkaExchange.Utils
 
             builder.RegisterType<OrderBookActor>();
             builder.RegisterType<OrderBookHandler>().As<ICommandHandler<OrderBookState>>();
-            builder.RegisterType<DefaultOrderMatcher>().As<IOrderMatcher>();
+            // builder.RegisterType<DefaultOrderMatcher>().As<IOrderMatcher>();
 
             builder.RegisterType<OrderExecutorActor>();
 

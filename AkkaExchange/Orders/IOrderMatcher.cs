@@ -1,66 +1,66 @@
-﻿using AkkaExchange.Orders.Extensions;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using AkkaExchange.Orders.Extensions;
 
 namespace AkkaExchange.Orders
 {
     public interface IOrderMatcher
     {
-        OrderMatchResult Match(IEnumerable<Order> orders);
+        OrderMatchResult Match(IEnumerable<PlacedOrder> orders);
     }
 
     public class DefaultOrderMatcher : IOrderMatcher
     {
         public OrderMatchResult Match(
-            IEnumerable<Order> orders)
+            IEnumerable<PlacedOrder> orders)
         {
             var bids = orders
-                .Where(o => o.Side == OrderSide.Bid)
-                .OrderByDescending(o => o.Price);
+                .Where(o => o.Details.Side == OrderSide.Bid)
+                .OrderByDescending(o => o.Details.Price);
 
             var asks = orders
-                .Where(o => o.Side == OrderSide.Ask)
-                .OrderBy(o => o.Price);
+                .Where(o => o.Details.Side == OrderSide.Ask)
+                .OrderBy(o => o.Details.Price);
 
             var matches = new List<OrderMatch>();
 
-            var availableBids = new Stack<Order>(
+            var availableBids = new Stack<PlacedOrder>(
                 bids.Where(b =>
-                    asks.Any(a => b.Price >= a.Price)));
+                    asks.Any(a => b.Details.Price >= a.Details.Price)));
 
-            var availableAsks = new Stack<Order>(
+            var availableAsks = new Stack<PlacedOrder>(
                 asks.Where(a =>
-                    bids.Any(b => b.Price >= a.Price)));
+                    bids.Any(b => b.Details.Price >= a.Details.Price)));
 
             while (availableBids.Any())
             {
                 var bid = availableBids.Pop();
 
-                while (bid.Amount > 0 && availableAsks.Any() && bid.Amount >= availableAsks.Peek().Price)
+                while (bid.Details.Amount > 0 && availableAsks.Any() && bid.Details.Amount >= availableAsks.Peek().Details.Price)
                 {
                     var ask = availableAsks.Pop();
 
                     var remainingAskAmount =
-                        ask.Amount >= bid.Amount ? ask.Amount - bid.Amount : 0;
+                        ask.Details.Amount >= bid.Details.Amount ? ask.Details.Amount - bid.Details.Amount : 0;
                     var remainingBuyAmount =
-                        ask.Amount >= bid.Amount ? 0 : bid.Amount - ask.Amount;
+                        ask.Details.Amount >= bid.Details.Amount ? 0 : bid.Details.Amount - ask.Details.Amount;
 
-                    var matchedBid = bid.WithAmount(bid.Amount - remainingBuyAmount);
-                    var matchedAsk = ask.WithAmount(ask.Amount - remainingAskAmount);
+                    var matchedBid = bid.Details.WithAmount(bid.Details.Amount - remainingBuyAmount);
+                    var matchedAsk = ask.Details.WithAmount(ask.Details.Amount - remainingAskAmount);
 
                     matches.Add(new OrderMatch(matchedBid, matchedAsk));
 
-                    bid = bid.WithAmount(remainingBuyAmount);
+                    bid = bid.Details.WithAmount(remainingBuyAmount);
 
                     if (remainingAskAmount > 0)
                     {
                         availableAsks.Push(
-                            ask.WithAmount(remainingAskAmount));
+                            ask.Details.WithAmount(remainingAskAmount));
                     }
                     if (remainingBuyAmount > 0)
                     {
                         availableBids.Push(
-                            bid.WithAmount(remainingBuyAmount));
+                            bid.Details.WithAmount(remainingBuyAmount));
                     }
                 }
             }

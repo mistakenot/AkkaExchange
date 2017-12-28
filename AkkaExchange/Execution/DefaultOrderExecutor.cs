@@ -7,7 +7,7 @@ namespace AkkaExchange.Execution
 {
     public class DefaultOrderExecutor : IOrderExecutor
     {
-        public IObservable<OrderExecutorStatus> Execute(Order order)
+        public IObservable<OrderExecutorStatus> Execute(PlacedOrder order)
         {
             var observer = new Subject<OrderExecutorStatus>();
 

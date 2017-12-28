@@ -5,6 +5,6 @@ namespace AkkaExchange.Execution
 {
     public interface IOrderExecutor
     {
-        IObservable<OrderExecutorStatus> Execute(Order order);
+        IObservable<OrderExecutorStatus> Execute(PlacedOrder order);
     }
 }
