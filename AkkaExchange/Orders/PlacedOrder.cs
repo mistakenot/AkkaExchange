@@ -2,11 +2,10 @@
 
 namespace AkkaExchange.Orders
 {
-    public class PlacedOrder 
+    public class PlacedOrder : Order
     {
-        public Order Details { get; }
-        public DateTime PlacedAt { get; }
         public Guid OrderId { get; }
+        public DateTime PlacedAt { get; }
 
         public PlacedOrder(
             Order order)
@@ -27,8 +26,8 @@ namespace AkkaExchange.Orders
             Order details, 
             DateTime placedAt, 
             Guid orderId)
+            : base(details)
         {
-            Details = details ?? throw new ArgumentNullException(nameof(details));
             PlacedAt = placedAt;
             OrderId = orderId;
         }

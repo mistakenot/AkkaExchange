@@ -8,7 +8,13 @@ namespace AkkaExchange.Orders
         public decimal Price { get; }
         public OrderSide Side { get; }
         public Guid ClientId { get; }
-        
+
+        public Order(Order order)
+            : this(order.ClientId, order.Amount, order.Price, order.Side)
+        {
+            
+        }
+
         public Order(Guid clientId, decimal amount, decimal price, OrderSide side)
         {
             if (amount < 0m) throw new ArgumentException("Amount must be > 0.");

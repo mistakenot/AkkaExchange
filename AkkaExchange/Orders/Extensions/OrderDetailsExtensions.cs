@@ -4,29 +4,24 @@ namespace AkkaExchange.Orders.Extensions
 {
     public static class OrderDetailsExtensions
     {
-        public static Order Add(this Order order, decimal amount) =>
-            WithAmount(order, order.Amount + amount);
-
-        public static Order Subtract(this Order order, decimal amount)
-            => Add(order, -amount);
-
-        public static Order WithAmount(this Order order, decimal amount)
-            => new Order(
-                order.ClientId,
-                amount,
-                order.Price,
-                order.Side);
+        public static PlacedOrder WithAmount(this PlacedOrder order, decimal amount)
+            => new PlacedOrder(
+                new Order(
+                    order.ClientId,
+                    amount,
+                    order.Price,
+                    order.Side),
+                order.PlacedAt,
+                order.OrderId);
         
-        public static (Order, Order) Split(this Order order, decimal amount)
-        {
-            if (amount > order.Amount)
-            {
-                throw new ArgumentException("Amount is invalid.");
-            }
-
-            return (
-                order.WithAmount(amount),
-                order.WithAmount(order.Amount - amount));
-        }
+        public static PlacedOrder WithPrice(this PlacedOrder order, decimal price)
+            => new PlacedOrder(
+                new Order(
+                    order.ClientId,
+                    order.Amount,
+                    price,
+                    order.Side),
+                order.PlacedAt,
+                order.OrderId);
     }
 }

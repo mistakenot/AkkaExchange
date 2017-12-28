@@ -23,7 +23,7 @@ namespace AkkaExchange.Orders.Queries
             var es = events.ToList();
             var from = es.Min(e => e.Order.PlacedAt);
             var to = es.Max(e => e.Order.PlacedAt);
-            var volume = es.Sum(e => e.Order.Details.Amount);
+            var volume = es.Sum(e => e.Order.Amount);
 
             return new PlacedOrderVolume(
                 from,

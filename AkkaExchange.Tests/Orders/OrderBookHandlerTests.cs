@@ -40,11 +40,11 @@ namespace AkkaExchange.Tests.Orders
             var placedOrder = new PlacedOrder(_order);
             var result = _subject.Handle(
                 OrderBookState.Empty.Update(new NewOrderEvent(placedOrder)),
-                new AmendOrderCommand(placedOrder.OrderId, placedOrder.Details.WithAmount(2m)));
+                new AmendOrderCommand(placedOrder.OrderId, placedOrder.WithAmount(2m)));
 
             var evnt = AssertSuccess<AmendOrderEvent>(result);
             Assert.Equal(placedOrder.OrderId, evnt.Order.OrderId);
-            Assert.Equal(2m, evnt.Order.Details.Amount);
+            Assert.Equal(2m, evnt.Order.Amount);
         }
 
         [Fact]
@@ -52,7 +52,7 @@ namespace AkkaExchange.Tests.Orders
         {
             _matcherMock
                 .Setup(m => m.Match(It.IsAny<IEnumerable<PlacedOrder>>()))
-                .Returns(new OrderMatchResult(Enumerable.Empty<OrderMatch>(), Enumerable.Empty<Order>()));
+                .Returns(new OrderMatchResult(Enumerable.Empty<OrderMatch>()));
 
             var result = _subject.Handle(
                 OrderBookState.Empty,
@@ -60,7 +60,6 @@ namespace AkkaExchange.Tests.Orders
 
             var evnt = AssertSuccess<MatchedOrdersEvent>(result);
             Assert.Empty(evnt.MatchedOrders.Matches);
-            Assert.Empty(evnt.MatchedOrders.Orders);
         }
 
         [Fact]

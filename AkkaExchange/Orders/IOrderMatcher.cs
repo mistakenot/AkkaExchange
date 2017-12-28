@@ -9,65 +9,74 @@ namespace AkkaExchange.Orders
         OrderMatchResult Match(IEnumerable<PlacedOrder> orders);
     }
 
+    /// <summary>
+    /// Default order matching algorithm. 
+    /// - Prioritises based on price then when received.
+    /// - Partially fills all orders.
+    /// - Price is the simple average of bid and ask.
+    /// </summary>
     public class DefaultOrderMatcher : IOrderMatcher
     {
         public OrderMatchResult Match(
             IEnumerable<PlacedOrder> orders)
         {
             var bids = orders
-                .Where(o => o.Details.Side == OrderSide.Bid)
-                .OrderByDescending(o => o.Details.Price);
+                .Where(o => o.Side == OrderSide.Bid && o.Amount > 0m)
+                .OrderByDescending(o => o.Price)
+                .ThenBy(o => o.PlacedAt);
 
             var asks = orders
-                .Where(o => o.Details.Side == OrderSide.Ask)
-                .OrderBy(o => o.Details.Price);
+                .Where(o => o.Side == OrderSide.Ask && o.Amount > 0m)
+                .OrderBy(o => o.Price)
+                .ThenBy(o => o.PlacedAt);
 
             var matches = new List<OrderMatch>();
 
             var availableBids = new Stack<PlacedOrder>(
                 bids.Where(b =>
-                    asks.Any(a => b.Details.Price >= a.Details.Price)));
+                    asks.Any(a => b.Price >= a.Price)).Reverse());
 
             var availableAsks = new Stack<PlacedOrder>(
                 asks.Where(a =>
-                    bids.Any(b => b.Details.Price >= a.Details.Price)));
+                    bids.Any(b => b.Price >= a.Price)).Reverse());
 
-            while (availableBids.Any())
+            while (availableBids.Any() && availableAsks.Any() &&
+                   availableBids.Peek().Amount > 0 && availableAsks.Peek().Amount > 0)
             {
                 var bid = availableBids.Pop();
+                var ask = availableAsks.Pop();
 
-                while (bid.Details.Amount > 0 && availableAsks.Any() && bid.Details.Amount >= availableAsks.Peek().Details.Price)
+                var remainingAskAmount =
+                    ask.Amount >= bid.Amount ? ask.Amount - bid.Amount : 0;
+                var remainingBidAmount =
+                    ask.Amount >= bid.Amount ? 0 : bid.Amount - ask.Amount;
+
+                var price = (bid.Price + ask.Price) / 2M;
+
+                var matchedBid = bid
+                    .WithAmount(bid.Amount - remainingBidAmount)
+                    .WithPrice(price);
+                var matchedAsk = ask
+                    .WithAmount(ask.Amount - remainingAskAmount)
+                    .WithPrice(price);
+
+                matches.Add(new OrderMatch(matchedBid, matchedAsk));
+
+                if (remainingAskAmount > 0)
                 {
-                    var ask = availableAsks.Pop();
-
-                    var remainingAskAmount =
-                        ask.Details.Amount >= bid.Details.Amount ? ask.Details.Amount - bid.Details.Amount : 0;
-                    var remainingBuyAmount =
-                        ask.Details.Amount >= bid.Details.Amount ? 0 : bid.Details.Amount - ask.Details.Amount;
-
-                    var matchedBid = bid.Details.WithAmount(bid.Details.Amount - remainingBuyAmount);
-                    var matchedAsk = ask.Details.WithAmount(ask.Details.Amount - remainingAskAmount);
-
-                    matches.Add(new OrderMatch(matchedBid, matchedAsk));
-
-                    bid = bid.Details.WithAmount(remainingBuyAmount);
-
-                    if (remainingAskAmount > 0)
-                    {
-                        availableAsks.Push(
-                            ask.Details.WithAmount(remainingAskAmount));
-                    }
-                    if (remainingBuyAmount > 0)
-                    {
-                        availableBids.Push(
-                            bid.Details.WithAmount(remainingBuyAmount));
-                    }
+                    availableAsks.Push(
+                        new PlacedOrder(
+                            ask.WithAmount(remainingAskAmount)));
+                }
+                if (remainingBidAmount > 0)
+                {
+                    availableBids.Push(
+                        new PlacedOrder(
+                            bid.WithAmount(remainingBidAmount)));
                 }
             }
 
-            return new OrderMatchResult(
-                matches,
-                availableAsks.Concat(availableBids));
+            return new OrderMatchResult(matches);
         }
     }
 }
