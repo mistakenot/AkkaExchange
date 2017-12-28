@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 using Akka.DI.Core;
-using AkkaExchange.Actors;
+using AkkaExchange.Shared.Actors;
 using AkkaExchange.Execution.Events;
 
 namespace AkkaExchange.Execution.Actors

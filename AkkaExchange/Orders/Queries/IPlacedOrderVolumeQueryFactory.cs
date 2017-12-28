@@ -33,9 +33,9 @@ namespace AkkaExchange.Orders.Queries
                     long.MaxValue)
                 .Where(env => env.Event is NewOrderEvent)
                 .Select(env => env.Event as NewOrderEvent)
-                .GroupedWithin(int.MaxValue, timeChunkSize)
+                .GroupedWithin(100, timeChunkSize)
                 .Select(PlacedOrderVolume.FromEnumerable);
-
+            
             return new SourceObservable<PlacedOrderVolume>(eventsSource, _materializer);
         }
     }

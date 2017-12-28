@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Collections.Immutable;
-using AkkaExchange.Matching.Events;
 using AkkaExchange.Orders.Events;
 
 namespace AkkaExchange.Orders
 {
     public class OrderBookState : IState<OrderBookState>
     {
-        public IImmutableList<Order> PendingOrders { get; }
-        public IImmutableList<Order> ExecutingOrders { get; }
-        public bool IsMatching { get; }
+        public IImmutableList<PlacedOrder> PendingOrders { get; }
+        public IImmutableList<PlacedOrder> ExecutingOrders { get; }
 
-        public OrderBookState(IImmutableList<Order> pendingOrders, IImmutableList<Order> executingOrders, bool isMatching)
+        public OrderBookState(
+            IImmutableList<PlacedOrder> pendingOrders, 
+            IImmutableList<PlacedOrder> executingOrders)
         {
-            IsMatching = isMatching;
             ExecutingOrders = executingOrders ?? throw new ArgumentNullException(nameof(executingOrders));
             PendingOrders = pendingOrders ?? throw new ArgumentNullException(nameof(pendingOrders));
         }
@@ -24,29 +23,19 @@ namespace AkkaExchange.Orders
             {
                 return new OrderBookState(
                     PendingOrders.Add(newOrderEvent.Order),
-                    ExecutingOrders,
-                    IsMatching);
+                    ExecutingOrders);
             }
 
             if (evnt is AmendOrderEvent amendOrderEvent)
             {
                 return new OrderBookState(
                     PendingOrders
-                        .RemoveAll(o => o.OrderId == amendOrderEvent.Order.OrderId)
+                        .RemoveAll(o => o.Details.OrderId == amendOrderEvent.Order.Details.OrderId)
                         .Add(amendOrderEvent.Order),
-                    ExecutingOrders,
-                    IsMatching);
+                    ExecutingOrders);
             }
 
-            if (evnt is BeginMatchOrdersEvent)
-            {
-                return new OrderBookState(
-                    PendingOrders,
-                    ExecutingOrders,
-                    true);
-            }
-
-            if (evnt is EndMatchOrdersEvent endMatchOrdersEvent)
+            if (evnt is MatchedOrdersEvent matchedOrdersEvent)
             {
                 
             }
@@ -56,8 +45,7 @@ namespace AkkaExchange.Orders
 
         public static readonly OrderBookState Empty = 
             new OrderBookState(
-                ImmutableList<Order>.Empty,
-                ImmutableList<Order>.Empty,
-                false);
+                ImmutableList<PlacedOrder>.Empty,
+                ImmutableList<PlacedOrder>.Empty);
     }
 }

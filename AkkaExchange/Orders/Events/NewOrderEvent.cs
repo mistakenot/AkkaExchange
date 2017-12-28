@@ -4,9 +4,9 @@ namespace AkkaExchange.Orders.Events
 {
     public class NewOrderEvent : IEvent
     {
-        public Order Order { get; }
+        public PlacedOrder Order { get; }
 
-        public NewOrderEvent(Order order)
+        public NewOrderEvent(PlacedOrder order)
         {
             Order = order ?? throw new ArgumentNullException(nameof(order));
         }

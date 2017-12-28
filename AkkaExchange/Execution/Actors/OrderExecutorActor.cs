@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using AkkaExchange.Actors;
+using AkkaExchange.Shared.Actors;
 using AkkaExchange.Execution.Commands;
 using AkkaExchange.Execution.Events;
 

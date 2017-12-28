@@ -1,5 +1,5 @@
 ﻿using Akka.Actor;
-using AkkaExchange.Actors;
+using AkkaExchange.Shared.Actors;
 using AkkaExchange.Client.Commands;
 using AkkaExchange.Client.Events;
 using AkkaExchange.Utils;

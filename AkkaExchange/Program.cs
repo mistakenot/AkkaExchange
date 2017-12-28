@@ -29,9 +29,14 @@ namespace AkkaExchange
 
                 var managerSubscription = exchange.Queries.ClientManagerState.Subscribe(s => Console.WriteLine(JsonConvert.SerializeObject(s)));
                 var orderBookSubscription = exchange.Queries.OrderBookState.Subscribe(s => Console.WriteLine(JsonConvert.SerializeObject(s)));
+                var placedOrderSubscription =
+                    exchange.Queries.PlacedOrderVolumePerMinute.Subscribe(s =>
+                        Console.WriteLine(JsonConvert.SerializeObject(s)));
 
                 client.NewOrder(1m, 1m, OrderSide.Ask);
                 client.NewOrder(2m, 2m, OrderSide.Bid);
+                client.NewOrder(2m, 3m, OrderSide.Bid);
+                client.NewOrder(2m, 4m, OrderSide.Bid);
 
                 Console.ReadLine();
 

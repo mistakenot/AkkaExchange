@@ -2,11 +2,11 @@
 
 namespace AkkaExchange.Orders.Events
 {
-    public class EndMatchOrdersEvent : IEvent
+    public class MatchedOrdersEvent : IEvent
     {
         public OrderMatchResult MatchedOrders { get; }
 
-        public EndMatchOrdersEvent(OrderMatchResult matchedOrders)
+        public MatchedOrdersEvent(OrderMatchResult matchedOrders)
         {
             MatchedOrders = matchedOrders ?? throw new ArgumentNullException(nameof(matchedOrders));
         }
