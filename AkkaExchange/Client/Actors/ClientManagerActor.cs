@@ -47,7 +47,7 @@ namespace AkkaExchange.Client.Actors
         private IActorRef CreateClient(StartConnectionEvent startConnectionEvent)
         {
             var clientState = new ClientState(startConnectionEvent.ClientId);
-            var props = Props.Create<ClientActor>(_clientCommandHandler, null, clientState);
+            var props = Props.Create<ClientActor>(_clientCommandHandler, clientState);
             var child = Context.ActorOf(props, startConnectionEvent.ClientId.ToString());
 
             child.Tell(

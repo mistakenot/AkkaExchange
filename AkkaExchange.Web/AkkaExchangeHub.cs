@@ -1,52 +1,43 @@
 ﻿using System;
 using System.Threading.Tasks;
+using AkkaExchange.Orders;
 using Microsoft.AspNetCore.SignalR;
 
 namespace AkkaExchange.Web
 {
     public class AkkaExchangeHub : Hub
     {
-        public const string ClientKey = "client";
-        public const string SubKey = "sub";
-
-        private readonly AkkaExchange _akkaExchange;
         private readonly HubSubscriptionCollection _subscriptions;
+        private readonly HubClientCollection _clients;
 
         public AkkaExchangeHub(
-            AkkaExchange akkaExchange,
-            HubSubscriptionCollection subscriptions)
+            HubSubscriptionCollection subscriptions,
+            HubClientCollection clients)
         {
-            _akkaExchange = akkaExchange;
             _subscriptions = subscriptions;
+            _clients = clients;
         }
 
         public override async Task OnConnectedAsync()
         {
-            var client = await _akkaExchange.NewConnection();
-
+            var client = await _clients.GetClient(Context.ConnectionId);
             _subscriptions.TryAdd(Context.ConnectionId, client.Events);
             
-            Context.Connection.Metadata.Add(ClientKey, client);
-
             await base.OnConnectedAsync();
         }
 
-        public override Task OnDisconnectedAsync(Exception exception)
+        public override async Task OnDisconnectedAsync(Exception exception)
         {
-            var client = Context.Connection.Metadata[ClientKey] as AkkaExchangeClient;
-            client?.Dispose();
-
+            await _clients.DisposeClient(Context.ConnectionId);
             _subscriptions.TryDispose(Context.ConnectionId);
 
-            return base.OnDisconnectedAsync(exception);
+            await base.OnDisconnectedAsync(exception);
         }
 
-        public void Bid(decimal price, decimal amount)
+        public async Task Bid(decimal price, decimal amount)
         {
-            Send(new {price, amount});   
+            var client = await _clients.GetClient(Context.ConnectionId);
+            client.NewOrder(price, amount, OrderSide.Bid);
         }
-        
-        private void Send(object msg) 
-            => Clients.Client(Context.Connection.ConnectionId).InvokeAsync("send", msg);
     }
 }

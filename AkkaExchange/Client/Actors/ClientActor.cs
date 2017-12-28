@@ -6,24 +6,23 @@ namespace AkkaExchange.Client.Actors
 {
     public class ClientActor : BaseActor<ClientState>
     {
-        private readonly IActorRef _orderBookActor;
+        private readonly ICanTell _orderBookActor;
 
         public ClientActor(
             ICommandHandler<ClientState> handler,
-            IActorRef orderBookActor,
             ClientState defaultState) 
             : base(handler, defaultState, defaultState.ClientId.ToString())
         {
-            _orderBookActor = orderBookActor;
+            _orderBookActor = Context.ActorSelection("/user/order-book");
         }
 
         protected override void OnPersist(IEvent persistedEvent)
         {
             if (persistedEvent is ExecuteOrderEvent executeOrderCommand)
             {
-                // _orderBookActor.Tell(executeOrderCommand.OrderCommand, Self);
+                _orderBookActor.Tell(executeOrderCommand.OrderCommand, Self);
             }
-
+            
             base.OnPersist(persistedEvent);
         }
     }

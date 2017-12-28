@@ -10,6 +10,7 @@ using Akka.Streams;
 using Akka.Streams.Dsl;
 using AkkaExchange.Client.Actors;
 using AkkaExchange.Client.Commands;
+using AkkaExchange.Orders.Actors;
 using Autofac;
 
 namespace AkkaExchange
@@ -19,27 +20,32 @@ namespace AkkaExchange
         private readonly ActorSystem _system;
         private readonly SqlReadJournal _readJournal;
         private readonly IActorRef _clientManager;
+        private readonly IActorRef _orderBook;
         private readonly ActorMaterializer _materializer;
         private Task _source;
 
-        public AkkaExchange(IContainer container, Config config)
+        public AkkaExchange(ContainerBuilder container, Config config)
         {
             _system = ActorSystem.Create("akka-exchange-system", config);
+
             _system.AddDependencyResolver(
-                new AutoFacDependencyResolver(container, _system));
+                new AutoFacDependencyResolver(container.Build(), _system));
 
             _materializer = ActorMaterializer.Create(_system);
             _readJournal = PersistenceQuery.Get(_system).ReadJournalFor<SqlReadJournal>("akka.persistence.query.journal.sql");
-
+            
             _source = _readJournal.PersistenceIds().RunForeach(id =>
             {
                 Console.WriteLine(id);
             }, _materializer);
-
-            var props = _system.DI().Props<ClientManagerActor>();
-
+            
             _clientManager = _system.ActorOf(
-                props, "client-manager");
+                _system.DI().Props<ClientManagerActor>(), 
+                "client-manager");
+
+            _orderBook = _system.ActorOf(
+                _system.DI().Props<OrderBookActor>(),
+                "order-book");
         }
 
         public void Dispose()
@@ -63,7 +69,10 @@ namespace AkkaExchange
 
             var subscription = eventsSource
                 .Select(env => env.Event)
-                .RunForeach(e => inbox.Receiver.Tell(e), _materializer);
+                .RunForeach(e =>
+                {
+                    inbox.Receiver.Tell(e);
+                }, _materializer);
 
             return new AkkaExchangeClient(
                 command.ClientId,

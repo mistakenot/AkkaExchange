@@ -3,6 +3,7 @@ using System.IO;
 using Akka.Configuration;
 using AkkaExchange.Orders;
 using AkkaExchange.Utils;
+using Autofac;
 
 namespace AkkaExchange
 {
@@ -12,14 +13,12 @@ namespace AkkaExchange
         {
             Console.WriteLine("Starting Exchange...");
 
-            var container = new Autofac.ContainerBuilder()
-                .AddAkkaExchangeDependencies()
-                .Build();
+            var builder = new ContainerBuilder().AddAkkaExchangeDependencies();
 
             var configString = File.ReadAllText("config.txt");
             var config = ConfigurationFactory.ParseString(configString);
 
-            using (var exchange = new AkkaExchange(container, config))
+            using (var exchange = new AkkaExchange(builder, config))
             {
                 var client = exchange.NewConnection().Result;
                 var clientSubscription = client.Events.Subscribe(e =>

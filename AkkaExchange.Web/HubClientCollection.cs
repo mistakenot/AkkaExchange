@@ -22,8 +22,7 @@ namespace AkkaExchange.Web
 
         public async Task DisposeClient(string clientId)
         {
-            Task<AkkaExchangeClient> valueFactory;
-            if (Clients.TryGetValue(clientId, out valueFactory))
+            if (Clients.TryRemove(clientId, out var valueFactory))
             {
                 var value = await valueFactory;
                 value.Dispose();

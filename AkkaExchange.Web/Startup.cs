@@ -18,15 +18,16 @@ namespace AkkaExchange.Web
             services.AddSingleton(sp =>
             {
                 var container = new Autofac.ContainerBuilder()
-                    .AddAkkaExchangeDependencies()
-                    .Build();
+                    .AddAkkaExchangeDependencies();
 
                 var configString = File.ReadAllText("config.txt");
                 var config = ConfigurationFactory.ParseString(configString);
 
                 return new AkkaExchange(container, config);
             });
+
             services.AddTransient<HubSubscriptionCollection>();
+            services.AddTransient<HubClientCollection>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
