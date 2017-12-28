@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.IO;
+using Akka.Configuration;
+using AkkaExchange.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -16,7 +15,18 @@ namespace AkkaExchange.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSignalR();
-            // services.AddSingleton<AkkaExchange>();
+            services.AddSingleton(sp =>
+            {
+                var container = new Autofac.ContainerBuilder()
+                    .AddAkkaExchangeDependencies()
+                    .Build();
+
+                var configString = File.ReadAllText("config.txt");
+                var config = ConfigurationFactory.ParseString(configString);
+
+                return new AkkaExchange(container, config);
+            });
+            services.AddTransient<HubSubscriptionCollection>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

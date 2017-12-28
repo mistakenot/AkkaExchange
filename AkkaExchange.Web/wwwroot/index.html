@@ -4,17 +4,95 @@
     <meta charset="utf-8" />
     <title>Testing</title>
     <script src="signalr-client-1.0.0-alpha2-final.js"></script>
+    <script src="jquery-3.2.1.min.js"></script>
+    <script src="jquery.terminal-1.11.1.min.js"></script>
+    <script src="bootstrap.min.js"></script>
+    <link rel="stylesheet" href="jquery.terminal-1.11.1.min.css" type="text/css"/>
+    <link rel="stylesheet" href="bootstrap.min.css"/>
 </head>
 <body>
-    <script>
-        let connection = new signalR.HubConnection('/hub');
- 
-        connection.on('send', data => {
-            console.log(data);
-        });
- 
-        connection.start()
-            .then(() => connection.invoke('send', 'Hello'));
-    </script>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div id="output_terminal"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div id="input_terminal"></div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    jQuery(function($, undefined) {
+        var start = (term) => {
+            let connection = new signalR.HubConnection('/hub');
+
+            connection.on('send',
+                data => {
+                    console.log(data);
+                    term.echo(JSON.stringify(data));
+                });
+
+            connection.start()
+                .then(() => term.echo("Connected successfully."));
+    
+            var funcs = {
+                help: function() {
+                    this.echo("AKKAEXCHANGE CLIENT REPL\n" +
+                        " help                                displays help text and commands.\n" +
+                        " bid [price] [quantity]              make a new bid (buy) offer.\n" +
+                        " ask [price] [quantity]              make a new ask (sell) offer.\n" +
+                        " orders                              list current open orders.\n" +
+                        " cancel [order id]                   cancel an order.\n" +
+                        " amend [order id] [price] [quantity] amend an order.");
+                },
+                bid: function (price, amount) {
+                    connection.invoke('bid', price, amount);
+                },
+                ask: function(price, amount) {
+                    connection.invoke('ask', price, amount);
+                },
+                amend: {
+                    bid: function(price, amount) {
+
+                    },
+                    ask: function(price, amount) {
+
+                    }
+                }
+            };
+
+            var inputTerminal = $('#input_terminal').terminal(
+                funcs,
+                {
+                    greetings: false,
+                    name: 'js_demo',
+                    height: 200,
+                    prompt: '> ',
+                    onInit: function (term) {
+                        funcs.help.bind(term)();
+                    }
+                });
+        }
+
+        var outputTerminal = $("#output_terminal").terminal(
+            {},
+            {
+                greetings: "Connecting...",
+                name: 'js_demo_two',
+                height: 200,
+                keypress: () => {
+                    return false;
+                },
+                prompt: '',
+                onInit: function (term) {
+                    term.freeze(true);
+                    start(term);
+                }
+            });
+    });
+</script>
 </body>
 </html>

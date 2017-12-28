@@ -69,7 +69,11 @@ namespace AkkaExchange
 
             _actor.Tell(command);
             _inbox.Dispose();
-            _subscription.Dispose();
+
+            if (_subscription.IsCompleted)
+            {
+                _subscription.Dispose();
+            }
         }
     }
 }
