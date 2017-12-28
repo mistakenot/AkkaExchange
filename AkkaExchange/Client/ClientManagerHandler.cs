@@ -2,6 +2,7 @@
 using System.Linq;
 using AkkaExchange.Client.Commands;
 using AkkaExchange.Client.Events;
+using AkkaExchange.Execution.Events;
 using AkkaExchange.Utils;
 
 namespace AkkaExchange.Client

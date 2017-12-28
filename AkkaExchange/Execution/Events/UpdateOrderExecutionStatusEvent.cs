@@ -4,13 +4,13 @@ namespace AkkaExchange.Execution.Events
 {
     public class UpdateOrderExecutionStatusEvent : IEvent
     {
-        public Guid StateOrderId { get; }
-        public OrderExecutorStatus CommandStatus { get; }
+        public Guid OrderId { get; }
+        public OrderExecutorStatus Status { get; }
 
-        public UpdateOrderExecutionStatusEvent(Guid stateOrderId, OrderExecutorStatus commandStatus)
+        public UpdateOrderExecutionStatusEvent(Guid orderId, OrderExecutorStatus status)
         {
-            StateOrderId = stateOrderId;
-            CommandStatus = commandStatus;
+            OrderId = orderId;
+            Status = status;
         }
     }
 }

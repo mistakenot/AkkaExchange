@@ -10,9 +10,11 @@ using Akka.Streams;
 using AkkaExchange.Client;
 using AkkaExchange.Client.Actors;
 using AkkaExchange.Client.Commands;
+using AkkaExchange.Execution.Actors;
 using AkkaExchange.Orders.Actors;
 using AkkaExchange.Orders.Commands;
 using AkkaExchange.Shared.Queries;
+using AkkaExchange.Utils;
 using Autofac;
 
 namespace AkkaExchange
@@ -27,10 +29,15 @@ namespace AkkaExchange
         private Task _source;
         private readonly IEventsQueryFactory _eventsQueryFactory;
         private readonly StateQueryFactory<ClientState> _clientStateQueryFactory;
+        private readonly IActorRef _orderExecutorManager;
 
         public AkkaExchange(ContainerBuilder container, Config config)
         {
             _system = ActorSystem.Create("akka-exchange-system", config);
+
+            var globalActorRefs = new GlobalActorRefs();
+
+            container.RegisterInstance<IGlobalActorRefs>(globalActorRefs);
 
             _system.AddDependencyResolver(
                 new AutoFacDependencyResolver(container.Build(), _system));
@@ -45,10 +52,17 @@ namespace AkkaExchange
             _clientManager = _system.ActorOf(
                 _system.DI().Props<ClientManagerActor>(), 
                 "client-manager");
+            globalActorRefs.ClientManager = _clientManager;
 
             _orderBook = _system.ActorOf(
                 _system.DI().Props<OrderBookActor>(),
                 "order-book");
+            globalActorRefs.OrderBook = _orderBook;
+
+            _orderExecutorManager = _system.ActorOf(
+                _system.DI().Props<OrderExecutorManagerActor>(),
+                "order-executor");
+            globalActorRefs.OrderExecutorManager = _orderExecutorManager;
 
             // Match orders every second.
             _system

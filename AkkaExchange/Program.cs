@@ -34,9 +34,7 @@ namespace AkkaExchange
                         Console.WriteLine(JsonConvert.SerializeObject(s)));
 
                 client.NewOrder(1m, 1m, OrderSide.Ask);
-                client.NewOrder(2m, 2m, OrderSide.Bid);
-                client.NewOrder(2m, 3m, OrderSide.Bid);
-                client.NewOrder(2m, 4m, OrderSide.Bid);
+                client.NewOrder(2m, 1m, OrderSide.Bid);
 
                 Console.ReadLine();
 

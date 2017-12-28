@@ -16,13 +16,13 @@ namespace AkkaExchange.Orders.Actors
 
         public OrderBookActor(
             ICommandHandler<OrderBookState> commandHandler,
-            IActorRef orderExecutorManager)
+            IGlobalActorRefs globalActorRefs)
             : base(
                 commandHandler,
                 OrderBookState.Empty,
                 Constants.OrderBookPersistenceId)
         {
-            _orderExecutorManager = orderExecutorManager ?? throw new ArgumentNullException(nameof(orderExecutorManager));
+            _orderExecutorManager = globalActorRefs?.OrderExecutorManager ?? throw new ArgumentNullException(nameof(globalActorRefs));
         }
 
         protected override void OnPersist(IEvent persistedEvent)

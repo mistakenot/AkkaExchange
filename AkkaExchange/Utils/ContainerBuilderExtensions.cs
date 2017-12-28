@@ -1,5 +1,6 @@
 ﻿using AkkaExchange.Client;
 using AkkaExchange.Client.Actors;
+using AkkaExchange.Execution;
 using AkkaExchange.Execution.Actors;
 using AkkaExchange.Orders;
 using AkkaExchange.Orders.Actors;
@@ -19,9 +20,12 @@ namespace AkkaExchange.Utils
 
             builder.RegisterType<OrderBookActor>();
             builder.RegisterType<OrderBookHandler>().As<ICommandHandler<OrderBookState>>();
-            // builder.RegisterType<DefaultOrderMatcher>().As<IOrderMatcher>();
+            builder.RegisterType<DefaultOrderMatcher>().As<IOrderMatcher>();
 
             builder.RegisterType<OrderExecutorActor>();
+            builder.RegisterType<OrderExecutorManagerActor>();
+            builder.RegisterType<OrderExecutorHandler>().As<ICommandHandler<OrderExecutorState>>();
+            builder.RegisterType<DefaultOrderExecutor>().As<IOrderExecutor>();
 
             return builder;
         }

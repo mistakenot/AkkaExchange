@@ -1,48 +1,62 @@
-﻿using System;
-using System.Collections.Immutable;
+﻿using Akka.Actor;
 using Akka.DI.Core;
-using AkkaExchange.Shared.Actors;
-using AkkaExchange.Execution.Events;
+using AkkaExchange.Execution.Commands;
+using AkkaExchange.Orders.Commands;
+using AkkaExchange.Utils;
 
 namespace AkkaExchange.Execution.Actors
 {
-    public class OrderExecutorManagerActor : BaseActor<OrderExecutorManagerState>
+    public class OrderExecutorManagerActor : UntypedActor
     {
+        private readonly IOrderExecutor _orderExecutor;
+        private readonly IGlobalActorRefs _globalActorRefs;
+        private readonly ICommandHandler<OrderExecutorState> _handler;
+
         public OrderExecutorManagerActor(
-            string persistenceId) 
-            : base(null, OrderExecutorManagerState.Empty, persistenceId)
+            IOrderExecutor orderExecutor,
+            IGlobalActorRefs globalActorRefs,
+            ICommandHandler<OrderExecutorState> handler)
         {
+            _orderExecutor = orderExecutor;
+            _globalActorRefs = globalActorRefs;
+            _handler = handler;
         }
 
-        protected override void OnPersist(IEvent persistedEvent)
+        protected override void OnReceive(object message)
         {
-            if (persistedEvent is BeginOrderExecutionEvent beginOrderExecutionEvent)
+            if (message is BeginOrderExecutionCommand beginOrderExecutionCommand)
             {
-                var props = Context.DI().Props<OrderExecutorActor>();
-                var name = beginOrderExecutionEvent.Order.OrderId.ToString();
-                var child = Context.ActorOf(props, name);
+                var orderId = beginOrderExecutionCommand.Order.OrderId.ToString();
+
+                if (Context.Child(orderId) == ActorRefs.Nobody)
+                {
+                    var props = Props.Create<OrderExecutorActor>(
+                        _orderExecutor,
+                        _handler,
+                        Self,
+                        new OrderExecutorState(beginOrderExecutionCommand.Order.OrderId));
+
+                    var child = Context.ActorOf(props, orderId);
+
+                    child.Tell(beginOrderExecutionCommand, Sender);
+                }
             }
 
-            base.OnPersist(persistedEvent);
-        }
-    }
+            if (message is UpdateOrderExecutionStatusCommand updateOrderExecutionStatusCommand &&
+                updateOrderExecutionStatusCommand.Status == OrderExecutorStatus.Complete)
+            {
+                var orderId = updateOrderExecutionStatusCommand.OrderId.ToString();
 
-    public class OrderExecutorManagerState : IState<OrderExecutorManagerState>
-    {
-        public IImmutableDictionary<Guid, OrderExecutorActor> ExecutingOrders { get; }
+                if (Context.Child(orderId) != ActorRefs.Nobody)
+                {
+                    var child = Context.Child(orderId);
+                    Context.Stop(child);
 
-        public OrderExecutorManagerState(IImmutableDictionary<Guid, OrderExecutorActor> executingOrders)
-        {
-            ExecutingOrders = executingOrders ?? throw new ArgumentNullException(nameof(executingOrders));
-        }
-
-        public static OrderExecutorManagerState Empty = 
-            new OrderExecutorManagerState(
-                ImmutableDictionary<Guid, OrderExecutorActor>.Empty);
-
-        public OrderExecutorManagerState Update(IEvent evnt)
-        {
-            throw new NotImplementedException();
+                    _globalActorRefs.OrderBook.Tell(
+                        new RemoveOrderCommand(updateOrderExecutionStatusCommand.OrderId),
+                        Self);
+                }
+            }
         }
     }
 }

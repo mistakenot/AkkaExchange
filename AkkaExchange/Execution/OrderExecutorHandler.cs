@@ -19,6 +19,27 @@ namespace AkkaExchange.Execution
                     new BeginOrderExecutionEvent(beginOrderExecutionCommand.Order));
             }
 
+            if (command is UpdateOrderExecutionStatusCommand updateOrderExecutionStatusCommand)
+            {
+                if (updateOrderExecutionStatusCommand.OrderId != state.OrderId)
+                {
+                    return new HandlerResult($"Wrong client id.");
+                }
+
+                if (state.Status < updateOrderExecutionStatusCommand.Status)
+                {
+                    return new HandlerResult(
+                        new UpdateOrderExecutionStatusEvent(
+                            updateOrderExecutionStatusCommand.OrderId, 
+                            updateOrderExecutionStatusCommand.Status));
+                }
+                else
+                {
+                    return new HandlerResult(
+                        $"Invalid state change: {state.Status} -> {updateOrderExecutionStatusCommand.Status}");
+                }
+            }
+
             return HandlerResult.NotHandled;
         }
     }

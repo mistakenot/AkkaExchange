@@ -1,4 +1,5 @@
-﻿using AkkaExchange.Utils;
+﻿using AkkaExchange.Execution.Events;
+using AkkaExchange.Utils;
 
 namespace AkkaExchange
 {

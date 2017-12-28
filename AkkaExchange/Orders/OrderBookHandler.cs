@@ -46,7 +46,7 @@ namespace AkkaExchange.Orders
 
             if (command is RemoveOrderCommand removeOrderCommand)
             {
-                if (state.OpenOrders.Any(o => o.OrderId == removeOrderCommand.OrderId))
+                if (state.ExecutingOrders.Any(o => o.OrderId == removeOrderCommand.OrderId))
                 {
                     return new HandlerResult(
                         new RemoveOrderEvent(

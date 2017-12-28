@@ -50,7 +50,6 @@ namespace AkkaExchange.Shared.Actors
         protected virtual void OnPersist(IEvent persistedEvent)
         {
             _state = _state.Update(persistedEvent);
-            // Sender.Tell(persistedEvent, Self);
         }
     }
 }
