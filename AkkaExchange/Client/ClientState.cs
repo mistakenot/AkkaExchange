@@ -12,6 +12,8 @@ namespace AkkaExchange.Client
         public DateTime? EndedAt { get; }
         public IImmutableList<ICommand> OrderCommandHistory { get; }
 
+        public static readonly ClientState Empty = new ClientState(Guid.Empty);
+
         public ClientState(Guid clientId)
             : this(clientId, ClientStatus.Pending, null, null, ImmutableList<ICommand>.Empty)
         {

@@ -1,5 +1,6 @@
 ﻿using System;
 using Akka.Actor;
+using AkkaExchange.Client;
 using AkkaExchange.Client.Commands;
 using AkkaExchange.Orders;
 using AkkaExchange.Orders.Commands;
@@ -8,6 +9,7 @@ namespace AkkaExchange
 {
     public class AkkaExchangeClient : IDisposable
     {
+        public IObservable<ClientState> State { get; }
         public IObservable<object> Events { get; }
 
         private readonly Guid _clientId;
@@ -18,12 +20,14 @@ namespace AkkaExchange
             Guid clientId,
             Inbox inbox,
             IActorRef clientActor, 
-            IObservable<object> events)
+            IObservable<object> events,
+            IObservable<ClientState> state)
         {
             _clientId = clientId;
-            _inbox = inbox;
+            _inbox = inbox ?? throw new ArgumentNullException(nameof(inbox));
             _clientActor = clientActor ?? throw new ArgumentNullException(nameof(clientActor));
 
+            State = state ?? throw new ArgumentNullException(nameof(state));
             Events = events ?? throw new ArgumentNullException(nameof(events));
         }
 

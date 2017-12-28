@@ -7,23 +7,25 @@ using Akka.DI.Core;
 using Akka.Persistence.Query;
 using Akka.Persistence.Query.Sql;
 using Akka.Streams;
-using Akka.Streams.Dsl;
+using AkkaExchange.Client;
 using AkkaExchange.Client.Actors;
 using AkkaExchange.Client.Commands;
 using AkkaExchange.Orders.Actors;
-using AkkaExchange.Utils;
+using AkkaExchange.Shared.Queries;
 using Autofac;
 
 namespace AkkaExchange
 {
     public class AkkaExchange : IDisposable
     {
+        public AkkaExchangeQueries Queries { get; }
+
         private readonly ActorSystem _system;
-        private readonly SqlReadJournal _readJournal;
         private readonly IActorRef _clientManager;
         private readonly IActorRef _orderBook;
-        private readonly ActorMaterializer _materializer;
         private Task _source;
+        private readonly IEventsQueryFactory _eventsQueryFactory;
+        private readonly StateQueryFactory<ClientState> _clientStateQueryFactory;
 
         public AkkaExchange(ContainerBuilder container, Config config)
         {
@@ -32,13 +34,16 @@ namespace AkkaExchange
             _system.AddDependencyResolver(
                 new AutoFacDependencyResolver(container.Build(), _system));
 
-            _materializer = ActorMaterializer.Create(_system);
-            _readJournal = PersistenceQuery.Get(_system).ReadJournalFor<SqlReadJournal>("akka.persistence.query.journal.sql");
-            
-            _source = _readJournal.PersistenceIds().RunForeach(id =>
+            var materializer = ActorMaterializer.Create(_system);
+            var readJournal = PersistenceQuery.Get(_system).ReadJournalFor<SqlReadJournal>("akka.persistence.query.journal.sql");
+
+            _clientStateQueryFactory = new StateQueryFactory<ClientState>(readJournal, materializer, ClientState.Empty);
+
+
+            _source = readJournal.PersistenceIds().RunForeach(id =>
             {
                 Console.WriteLine(id);
-            }, _materializer);
+            }, materializer);
             
             _clientManager = _system.ActorOf(
                 _system.DI().Props<ClientManagerActor>(), 
@@ -47,6 +52,10 @@ namespace AkkaExchange
             _orderBook = _system.ActorOf(
                 _system.DI().Props<OrderBookActor>(),
                 "order-book");
+
+            _eventsQueryFactory = new EventsQueryFactory(readJournal, materializer);
+
+            Queries = AkkaExchangeQueries.Create(materializer, readJournal);
         }
 
         public void Dispose()
@@ -62,18 +71,13 @@ namespace AkkaExchange
             _clientManager.Tell(command, inbox.Receiver);
 
             var clientActor = await inbox.ReceiveAsync();
-
-            var eventsSource = _readJournal.EventsByPersistenceId(
-                    command.ClientId.ToString(),
-                    0L,
-                    long.MaxValue)
-                .Select(env => env.Event);
+            var eventsQuery = _eventsQueryFactory.Create(command.ClientId.ToString());
 
             return new AkkaExchangeClient(
                 command.ClientId,
                 inbox,
                 clientActor as IActorRef,
-                new SourceObservable<object>(eventsSource, _materializer));
+                eventsQuery);
         }
 
         public async Task EndConnection(Guid connectionId)
