@@ -11,6 +11,7 @@ using Akka.Streams.Dsl;
 using AkkaExchange.Client.Actors;
 using AkkaExchange.Client.Commands;
 using AkkaExchange.Orders.Actors;
+using AkkaExchange.Utils;
 using Autofac;
 
 namespace AkkaExchange
@@ -63,22 +64,16 @@ namespace AkkaExchange
             var clientActor = await inbox.ReceiveAsync();
 
             var eventsSource = _readJournal.EventsByPersistenceId(
-                command.ClientId.ToString(),
-                0L,
-                long.MaxValue);
-
-            var subscription = eventsSource
-                .Select(env => env.Event)
-                .RunForeach(e =>
-                {
-                    inbox.Receiver.Tell(e);
-                }, _materializer);
+                    command.ClientId.ToString(),
+                    0L,
+                    long.MaxValue)
+                .Select(env => env.Event);
 
             return new AkkaExchangeClient(
                 command.ClientId,
+                inbox,
                 clientActor as IActorRef,
-                subscription,
-                inbox);
+                new SourceObservable<object>(eventsSource, _materializer));
         }
 
         public async Task EndConnection(Guid connectionId)

@@ -80,7 +80,7 @@
 	  # The SQL write journal is notifying the query side as soon as things
 	  # are persisted, but for efficiency reasons the query side retrieves the events 
 	  # in batches that sometimes can be delayed up to the configured `refresh-interval`.
-	  refresh-interval = 3s
+	  refresh-interval = 1s
   
 	  # How many events to fetch in one query (replay) and keep buffered until they
 	  # are delivered downstreams.

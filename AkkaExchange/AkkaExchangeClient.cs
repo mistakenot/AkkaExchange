@@ -1,34 +1,30 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Akka.Actor;
 using AkkaExchange.Client.Commands;
 using AkkaExchange.Orders;
 using AkkaExchange.Orders.Commands;
-using AkkaExchange.Utils;
 
 namespace AkkaExchange
 {
     public class AkkaExchangeClient : IDisposable
     {
-        public IObservable<object> Events { get; set; }
+        public IObservable<object> Events { get; }
 
         private readonly Guid _clientId;
         private readonly Inbox _inbox;
-        private readonly IActorRef _actor;
-        private readonly Task _subscription;
+        private readonly IActorRef _clientActor;
 
         internal AkkaExchangeClient(
-            Guid clientId, 
-            IActorRef actor, 
-            Task subscription, 
-            Inbox inbox)
+            Guid clientId,
+            Inbox inbox,
+            IActorRef clientActor, 
+            IObservable<object> events)
         {
             _clientId = clientId;
-            _actor = actor ?? throw new ArgumentNullException(nameof(actor));
-            _inbox = inbox ?? throw new ArgumentNullException(nameof(inbox));
-            _subscription = subscription ?? throw new ArgumentNullException(nameof(subscription));
+            _inbox = inbox;
+            _clientActor = clientActor ?? throw new ArgumentNullException(nameof(clientActor));
 
-            Events = new InboxObservable(inbox);
+            Events = events ?? throw new ArgumentNullException(nameof(events));
         }
 
         public void NewOrder(decimal price, decimal amount, OrderSide side)
@@ -38,7 +34,7 @@ namespace AkkaExchange
                 new NewOrderCommand(
                     new Order(_clientId, amount, price, side)));
 
-            _actor.Tell(command, _inbox.Receiver);
+            _clientActor.Tell(command, _inbox.Receiver);
         }
 
         public void AmendOrder(Guid orderId, decimal price, decimal amount, OrderSide side)
@@ -49,7 +45,7 @@ namespace AkkaExchange
                     orderId,
                     new Order(_clientId, orderId, amount, price, side)));
 
-            _actor.Tell(command, _inbox.Receiver);
+            _clientActor.Tell(command, _inbox.Receiver);
         }
 
         public void CancelOrder(Guid orderId)
@@ -58,7 +54,7 @@ namespace AkkaExchange
                 _clientId,
                 new RemoveOrderCommand(orderId));
 
-            _actor.Tell(command, _inbox.Receiver);
+            _clientActor.Tell(command, _inbox.Receiver);
         }
 
         public void Dispose()
@@ -67,13 +63,8 @@ namespace AkkaExchange
                 _clientId,
                 new EndConnectionCommand(_clientId));
 
-            _actor.Tell(command);
+            _clientActor.Tell(command);
             _inbox.Dispose();
-
-            if (_subscription.IsCompleted)
-            {
-                _subscription.Dispose();
-            }
         }
     }
 }

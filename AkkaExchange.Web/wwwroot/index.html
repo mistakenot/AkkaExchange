@@ -27,7 +27,7 @@
 <script>
     jQuery(function($, undefined) {
         var start = (term) => {
-            let connection = new signalR.HubConnection('/hub');
+            var connection = new signalR.HubConnection('/hub');
 
             connection.on('send',
                 data => {
@@ -80,7 +80,7 @@
         var outputTerminal = $("#output_terminal").terminal(
             {},
             {
-                greetings: "Connecting...",
+                greetings: "Connecting to event log...",
                 name: 'js_demo_two',
                 height: 200,
                 keypress: () => {
