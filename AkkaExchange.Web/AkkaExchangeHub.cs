@@ -39,5 +39,11 @@ namespace AkkaExchange.Web
             var client = await _clients.GetClient(Context.ConnectionId);
             client.NewOrder(price, amount, OrderSide.Bid);
         }
+
+        public async Task Ask(decimal price, decimal amount)
+        {
+            var client = await _clients.GetClient(Context.ConnectionId);
+            client.NewOrder(price, amount, OrderSide.Ask);
+        }
     }
 }
