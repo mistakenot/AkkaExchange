@@ -9,17 +9,17 @@ namespace AkkaExchange.Orders
     public class OrderBookState : IState<OrderBookState>
     {
         public IImmutableList<PlacedOrder> OpenOrders { get; }
-        public IImmutableList<PlacedOrder> PendingOrders { get; }
         public IImmutableList<PlacedOrder> ExecutingOrders { get; }
+        public IImmutableList<PlacedOrder> CompleteOrders { get; }
 
         public OrderBookState(
             IImmutableList<PlacedOrder> openOrders, 
             IImmutableList<PlacedOrder> executingOrders, 
-            IImmutableList<PlacedOrder> pendingOrders)
+            IImmutableList<PlacedOrder> completeOrders)
         {
-            PendingOrders = pendingOrders ?? throw new ArgumentNullException(nameof(pendingOrders));
-            ExecutingOrders = executingOrders ?? throw new ArgumentNullException(nameof(executingOrders));
             OpenOrders = openOrders ?? throw new ArgumentNullException(nameof(openOrders));
+            ExecutingOrders = executingOrders ?? throw new ArgumentNullException(nameof(executingOrders));
+            CompleteOrders = completeOrders ?? throw new ArgumentNullException(nameof(completeOrders));
         }
 
         public OrderBookState Update(IEvent evnt)
@@ -29,7 +29,7 @@ namespace AkkaExchange.Orders
                 return new OrderBookState(
                     OpenOrders.Add(newOrderEvent.Order),
                     ExecutingOrders,
-                    PendingOrders);
+                    CompleteOrders);
             }
 
             if (evnt is AmendOrderEvent amendOrderEvent)
@@ -39,7 +39,7 @@ namespace AkkaExchange.Orders
                         .RemoveAll(o => o.OrderId == amendOrderEvent.Order.OrderId)
                         .Add(amendOrderEvent.Order),
                     ExecutingOrders,
-                    PendingOrders);
+                    CompleteOrders);
             }
 
             if (evnt is MatchedOrdersEvent matchedOrdersEvent)
@@ -59,11 +59,20 @@ namespace AkkaExchange.Orders
                             OpenOrders
                                 .RemoveAll(o => o.OrderId == m.Bid.OrderId || o.OrderId == m.Ask.OrderId)
                                 .AddRange(newPendingOrders),
-                            ExecutingOrders,
-                            PendingOrders
+                            ExecutingOrders
                                 .Add(m.Bid)
-                                .Add(m.Ask));
+                                .Add(m.Ask),
+                            CompleteOrders);
                     });
+            }
+
+            if (evnt is CompleteOrderEvent completeOrderEvent)
+            {
+                return new OrderBookState(
+                    OpenOrders,
+                    ExecutingOrders.RemoveAll(o => o.OrderId == completeOrderEvent.OrderId),
+                    CompleteOrders.Add(
+                        ExecutingOrders.Single(o => o.OrderId == completeOrderEvent.OrderId)));
             }
 
             return this;

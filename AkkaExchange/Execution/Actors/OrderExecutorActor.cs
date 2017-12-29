@@ -4,7 +4,6 @@ using Akka.Actor;
 using AkkaExchange.Shared.Actors;
 using AkkaExchange.Execution.Commands;
 using AkkaExchange.Execution.Events;
-using AkkaExchange.Utils;
 
 namespace AkkaExchange.Execution.Actors
 {

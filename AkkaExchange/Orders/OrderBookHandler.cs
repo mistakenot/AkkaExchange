@@ -46,7 +46,7 @@ namespace AkkaExchange.Orders
 
             if (command is RemoveOrderCommand removeOrderCommand)
             {
-                if (state.ExecutingOrders.Any(o => o.OrderId == removeOrderCommand.OrderId))
+                if (state.OpenOrders.Any(o => o.OrderId == removeOrderCommand.OrderId))
                 {
                     return new HandlerResult(
                         new RemoveOrderEvent(
@@ -66,6 +66,20 @@ namespace AkkaExchange.Orders
                     new MatchedOrdersEvent(
                         result, 
                         typeof(DefaultOrderMatcher).FullName));
+            }
+
+            if (command is CompleteOrderCommand completeOrderCommand)
+            {
+                if (state.ExecutingOrders.Any(o => o.OrderId == completeOrderCommand.OrderId))
+                {
+                    return new HandlerResult(
+                        new CompleteOrderEvent(completeOrderCommand.OrderId));
+                }
+                else
+                {
+                    return new HandlerResult(
+                        $"Order id {completeOrderCommand.OrderId} not found in executing orders.");
+                }
             }
 
             return HandlerResult.NotHandled;

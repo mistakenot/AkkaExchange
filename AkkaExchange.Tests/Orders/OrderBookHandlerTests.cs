@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using AkkaExchange.Orders;
 using AkkaExchange.Orders.Commands;
@@ -70,6 +71,21 @@ namespace AkkaExchange.Tests.Orders
                 new RemoveOrderCommand(placedOrder.OrderId));
 
             var evnt = AssertSuccess<RemoveOrderEvent>(result);
+            Assert.Equal(placedOrder.OrderId, evnt.OrderId);
+        }
+
+        [Fact]
+        public void OrderBookHandler_ReceivesValidCompleteOrderCommand_HandlesOk()
+        {
+            var placedOrder = new PlacedOrder(_order);
+            var result = _subject.Handle(
+                new OrderBookState(
+                    ImmutableList<PlacedOrder>.Empty,
+                    ImmutableList<PlacedOrder>.Empty.Add(placedOrder),
+                    ImmutableList<PlacedOrder>.Empty),
+                new CompleteOrderCommand(placedOrder.OrderId));
+
+            var evnt = AssertSuccess<CompleteOrderEvent>(result);
             Assert.Equal(placedOrder.OrderId, evnt.OrderId);
         }
     }

@@ -26,12 +26,9 @@ namespace AkkaExchange
                 {
                     Console.WriteLine($"Client has received event: {e}");
                 });
-
-                var managerSubscription = exchange.Queries.ClientManagerState.Subscribe(s => Console.WriteLine(JsonConvert.SerializeObject(s)));
-                var orderBookSubscription = exchange.Queries.OrderBookState.Subscribe(s => Console.WriteLine(JsonConvert.SerializeObject(s)));
-                var placedOrderSubscription =
-                    exchange.Queries.PlacedOrderVolumePerMinute.Subscribe(s =>
-                        Console.WriteLine(JsonConvert.SerializeObject(s)));
+                
+                var orderBookSubscription = exchange.Queries.OrderBookState.Subscribe(s => 
+                    Console.WriteLine($"Open: {s.OpenOrders.Count}, Executing: {s.ExecutingOrders.Count}, Complete: {s.CompleteOrders.Count}."));
 
                 client.NewOrder(1m, 1m, OrderSide.Ask);
                 client.NewOrder(2m, 1m, OrderSide.Bid);

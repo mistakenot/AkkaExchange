@@ -1,5 +1,4 @@
 ﻿using Akka.Actor;
-using Akka.DI.Core;
 using AkkaExchange.Execution.Commands;
 using AkkaExchange.Orders.Commands;
 using AkkaExchange.Utils;
@@ -53,7 +52,7 @@ namespace AkkaExchange.Execution.Actors
                     Context.Stop(child);
 
                     _globalActorRefs.OrderBook.Tell(
-                        new RemoveOrderCommand(updateOrderExecutionStatusCommand.OrderId),
+                        new CompleteOrderCommand(updateOrderExecutionStatusCommand.OrderId),
                         Self);
                 }
             }
