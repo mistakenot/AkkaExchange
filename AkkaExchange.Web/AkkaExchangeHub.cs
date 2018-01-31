@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using AkkaExchange.Orders;
 using Microsoft.AspNetCore.SignalR;
+using System.Reactive.Linq;
 
 namespace AkkaExchange.Web
 {
@@ -9,19 +10,25 @@ namespace AkkaExchange.Web
     {
         private readonly HubSubscriptionCollection _subscriptions;
         private readonly HubClientCollection _clients;
+        private readonly AkkaExchange _akkaExchange;
 
-        public AkkaExchangeHub(
+        public AkkaExchangeHub( 
             HubSubscriptionCollection subscriptions,
-            HubClientCollection clients)
+            HubClientCollection clients,
+            AkkaExchange akkaExchange)
         {
             _subscriptions = subscriptions;
             _clients = clients;
+            _akkaExchange = akkaExchange;
         }
 
         public override async Task OnConnectedAsync()
         {
             var client = await _clients.GetClient(Context.ConnectionId);
-            _subscriptions.TryAdd(Context.ConnectionId, client.Events);
+            var subscription = client.Events
+                .Merge(_akkaExchange.Queries.ClientManagerState.Cast<object>());
+
+            _subscriptions.TryAdd(Context.ConnectionId, subscription);
             
             await base.OnConnectedAsync();
         }

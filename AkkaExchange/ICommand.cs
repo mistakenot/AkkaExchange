@@ -1,6 +1,6 @@
 ﻿namespace AkkaExchange
 {
-    public interface ICommand
+    public interface ICommand : IMessage
     {
         
     }
