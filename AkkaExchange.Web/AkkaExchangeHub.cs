@@ -26,6 +26,7 @@ namespace AkkaExchange.Web
         {
             var client = await _clients.GetClient(Context.ConnectionId);
             var subscription = client.Events
+                .Merge(client.State.Cast<object>())
                 .Merge(_akkaExchange.Queries.ClientManagerState.Cast<object>())
                 .Merge(_akkaExchange.Queries.PlacedOrderVolumePerTenSeconds.Cast<object>())
                 .Merge(_akkaExchange.Queries.OrderBookState.Cast<object>());

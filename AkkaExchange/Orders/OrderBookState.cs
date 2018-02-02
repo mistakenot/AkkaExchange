@@ -6,7 +6,7 @@ using AkkaExchange.Orders.Extensions;
 
 namespace AkkaExchange.Orders
 {
-    public class OrderBookState : IState<OrderBookState>
+    public class OrderBookState : Message, IState<OrderBookState>
     {
         public IImmutableList<PlacedOrder> OpenOrders { get; }
         public IImmutableList<PlacedOrder> ExecutingOrders { get; }

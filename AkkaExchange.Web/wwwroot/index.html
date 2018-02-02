@@ -7,6 +7,7 @@
     <script src="jquery-3.2.1.min.js"></script>
     <script src="jquery.terminal-1.11.1.min.js"></script>
     <script src="bootstrap.min.js"></script>
+    <script src="knockout-3.4.2.js"></script>
     <link rel="stylesheet" href="jquery.terminal-1.11.1.min.css" type="text/css"/>
     <link rel="stylesheet" href="bootstrap.min.css"/>
 </head>
@@ -22,16 +23,42 @@
                 <div id="input_terminal"></div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-12">
+                <p>Is Connected: <strong data-bind="text: isConnected"></strong></p>
+                <p>Connection Id: <strong data-bind="text: connectionId"></strong></p>
+                <p>Connected At: <strong data-bind="text: connectedAt"></strong></p>
+            </div>
+        </div>
     </div>
 
 <script>
+    var VM = function() {
+        var self = this;
+        self.clientState = ko.observable({})
+        self.isConnected = ko.computed(() => self.clientState().status)
+        self.connectedAt = ko.computed(() => self.isConnected() ? self.clientState().startedAt : "n/a")
+        self.connectionId = ko.computed(() => self.clientState().clientId)
+    }
+
+    var vm = new VM();
+    ko.applyBindings(vm);
+
     jQuery(function($, undefined) {
         var start = (term) => {
             var connection = new signalR.HubConnection('/hub');
 
             connection.on('send',
                 data => {
-                    console.log(data);
+                    
+                    switch (data.type) {
+                        case "ClientState":
+                            console.log(data);
+                            vm.clientState(data);
+                            break;
+                        default:
+                            break;
+                    }
                     term.echo(JSON.stringify(data));
                 });
 

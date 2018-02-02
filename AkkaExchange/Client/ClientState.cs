@@ -35,7 +35,7 @@ namespace AkkaExchange.Client
                 Status == ClientStatus.Pending)
             {
                 return new ClientState(
-                    ClientId,
+                    startConnectionEvent.ClientId,
                     ClientStatus.Connected,
                     startConnectionEvent.StartedAt,
                     null,
