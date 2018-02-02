@@ -70,9 +70,9 @@ namespace AkkaExchange.Orders
             {
                 return new OrderBookState(
                     OpenOrders,
-                    ExecutingOrders.RemoveAll(o => o.OrderId == completeOrderEvent.OrderId),
+                    ExecutingOrders.RemoveAll(o => o.OrderId == completeOrderEvent.Order.OrderId),
                     CompleteOrders.Add(
-                        ExecutingOrders.Single(o => o.OrderId == completeOrderEvent.OrderId)));
+                        ExecutingOrders.Single(o => o.OrderId == completeOrderEvent.Order.OrderId)));
             }
 
             return this;

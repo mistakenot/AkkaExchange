@@ -1,14 +1,15 @@
 ﻿using System;
+using AkkaExchange.Orders;
 
 namespace AkkaExchange.Orders.Events
 {
     public class CompleteOrderEvent : Message, IEvent
     {
-        public Guid OrderId { get; }
-
-        public CompleteOrderEvent(Guid orderId)
+        public PlacedOrder Order { get; }
+        
+        public CompleteOrderEvent(PlacedOrder order)
         {
-            OrderId = orderId;
+            Order = order;
         }
     }
 }

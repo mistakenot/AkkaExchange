@@ -48,7 +48,7 @@ namespace AkkaExchange.Tests.Orders
         }
 
         [Fact]
-        public void OrderBookHandler_ReceivesValidMatchOrderCommand_CallsOrderMatcher()
+        public void OrderBookHandler_ReceivesValidMatchOrderCommand_FailsOnEmptyBook()
         {
             _matcherMock
                 .Setup(m => m.Match(It.IsAny<IEnumerable<PlacedOrder>>()))
@@ -58,8 +58,7 @@ namespace AkkaExchange.Tests.Orders
                 OrderBookState.Empty,
                 new MatchOrdersCommand());
 
-            var evnt = AssertSuccess<MatchedOrdersEvent>(result);
-            Assert.Empty(evnt.MatchedOrders.Matches);
+            Assert.False(result.Success);
         }
 
         [Fact]
@@ -86,7 +85,7 @@ namespace AkkaExchange.Tests.Orders
                 new CompleteOrderCommand(placedOrder.OrderId));
 
             var evnt = AssertSuccess<CompleteOrderEvent>(result);
-            Assert.Equal(placedOrder.OrderId, evnt.OrderId);
+            Assert.Equal(placedOrder.OrderId, evnt.Order.OrderId);
         }
     }
 }

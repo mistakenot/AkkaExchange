@@ -39,11 +39,16 @@ namespace AkkaExchange
 
             container.RegisterInstance<IGlobalActorRefs>(globalActorRefs);
 
-            _system.AddDependencyResolver(
-                new AutoFacDependencyResolver(container.Build(), _system));
-
             var materializer = ActorMaterializer.Create(_system);
             var readJournal = PersistenceQuery.Get(_system).ReadJournalFor<SqlReadJournal>("akka.persistence.query.journal.sql");
+
+            Queries = AkkaExchangeQueries.Create(materializer, readJournal);
+
+            // Used in client actor
+            container.RegisterInstance(Queries.OrderBookState);
+
+            _system.AddDependencyResolver(
+                new AutoFacDependencyResolver(container.Build(), _system));
 
             _clientStateQueryFactory = new StateQueryFactory<ClientState>(readJournal, materializer, ClientState.Empty);
 
@@ -75,10 +80,7 @@ namespace AkkaExchange
                     ActorRefs.NoSender);
 
             _eventsQueryFactory = new EventsQueryFactory(readJournal, materializer);
-
-            Queries = AkkaExchangeQueries.Create(materializer, readJournal);
         }
-
         public void Dispose()
         {
             _system.Dispose();

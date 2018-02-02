@@ -2,9 +2,11 @@
 
 namespace AkkaExchange.Orders.Events
 {
-    public class AmendOrderEvent : Message, IEvent
+    public class AmendOrderEvent : Message, IClientOrderEvent
     {
         public PlacedOrder Order { get; }
+
+        public Guid ClientId => Order.ClientId;
 
         public AmendOrderEvent(PlacedOrder order)
         {

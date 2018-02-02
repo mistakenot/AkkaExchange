@@ -23,5 +23,11 @@ namespace AkkaExchange.Tests.Orders
             return Assert.IsType<TEvent>(result.Event);
         }
 
+        protected static TEvent AssertFailure<TEvent>(HandlerResult result)
+        {
+            Assert.False(result.Success);
+            return Assert.IsType<TEvent>(result.Event);
+        }
+
     }
 }

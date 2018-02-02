@@ -13,6 +13,7 @@ namespace AkkaExchange.Orders.Actors
     public class OrderBookActor : BaseActor<OrderBookState>
     {
         private readonly IActorRef _orderExecutorManager;
+        private readonly IActorRef _clientManager;
 
         public OrderBookActor(
             ICommandHandler<OrderBookState> commandHandler,
@@ -23,6 +24,7 @@ namespace AkkaExchange.Orders.Actors
                 Constants.OrderBookPersistenceId)
         {
             _orderExecutorManager = globalActorRefs?.OrderExecutorManager ?? throw new ArgumentNullException(nameof(globalActorRefs));
+            _clientManager = globalActorRefs?.ClientManager ?? throw new ArgumentNullException(nameof(globalActorRefs));
         }
 
         protected override void OnPersist(IEvent persistedEvent)
@@ -37,6 +39,12 @@ namespace AkkaExchange.Orders.Actors
                     _orderExecutorManager.Tell(
                         new BeginOrderExecutionCommand(matchedOrdersMatch.Ask));
                 }
+            }
+
+            if (persistedEvent is CompleteOrderEvent completeOrderEvent)
+            {
+                var evnt = new Client.Commands.CompleteOrderCommand(completeOrderEvent.Order);
+                _clientManager.Tell(evnt, Self);
             }
 
             base.OnPersist(persistedEvent);

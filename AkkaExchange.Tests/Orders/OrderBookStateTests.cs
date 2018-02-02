@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Linq;
+using System;
 using AkkaExchange.Orders;
 using AkkaExchange.Orders.Events;
 using AkkaExchange.Orders.Extensions;
@@ -64,7 +65,7 @@ namespace AkkaExchange.Tests.Orders
                 ImmutableList<PlacedOrder>.Empty);
 
             var result = state
-                .Update(new CompleteOrderEvent(bid.OrderId));
+                .Update(new CompleteOrderEvent(bid));
 
             Assert.Empty(result.OpenOrders);
             Assert.Empty(result.ExecutingOrders);

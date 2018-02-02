@@ -75,8 +75,10 @@ namespace AkkaExchange.Orders
             {
                 if (state.ExecutingOrders.Any(o => o.OrderId == completeOrderCommand.OrderId))
                 {
+                    var order = state.ExecutingOrders.Single(o => o.OrderId == completeOrderCommand.OrderId);
+
                     return new HandlerResult(
-                        new CompleteOrderEvent(completeOrderCommand.OrderId));
+                        new CompleteOrderEvent(order));
                 }
                 else
                 {

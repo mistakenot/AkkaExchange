@@ -21,6 +21,15 @@ namespace AkkaExchange.Client.Actors
             _clientCommandHandler = clientCommandHandler;
         }
 
+        protected override void OnCommand(object message)
+        {
+            if (message is CompleteOrderCommand completeOrderCommand)
+            {
+                Context.Child(completeOrderCommand.Order.ClientId.ToString()).Tell(message, Sender);
+            }
+
+            base.OnCommand(message);
+        }
         protected override void OnPersist(IEvent persistedEvent)
         {
             if (persistedEvent is StartConnectionEvent startConnectionEvent)

@@ -65,6 +65,20 @@ namespace AkkaExchange.Client
                         executeOrderCommand.OrderCommand));
             }
 
+            if (command is CompleteOrderCommand completeOrderCommand)
+            {
+                if (state.Status != ClientStatus.Connected)
+                {
+                    return new HandlerResult(
+                        $"Client is not connected.");
+                }
+
+                return new HandlerResult(
+                    new CompleteOrderEvent(
+                        completeOrderCommand.Order.Side,
+                        completeOrderCommand.Order.Amount));
+            }
+
             return HandlerResult.NotHandled;
         }
     }

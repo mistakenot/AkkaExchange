@@ -53,12 +53,12 @@
                     
                     switch (data.type) {
                         case "ClientState":
-                            console.log(data);
                             vm.clientState(data);
                             break;
                         default:
                             break;
                     }
+                    console.log(data);
                     term.echo(JSON.stringify(data));
                 });
 
