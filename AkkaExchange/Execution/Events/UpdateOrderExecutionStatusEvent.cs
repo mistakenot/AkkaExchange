@@ -2,7 +2,7 @@
 
 namespace AkkaExchange.Execution.Events
 {
-    public class UpdateOrderExecutionStatusEvent : IEvent
+    public class UpdateOrderExecutionStatusEvent : Message, IEvent
     {
         public Guid OrderId { get; }
         public OrderExecutorStatus Status { get; }

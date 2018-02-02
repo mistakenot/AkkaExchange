@@ -2,7 +2,7 @@
 
 namespace AkkaExchange.Execution.Events
 {
-    public class BeginOrderExecutionEvent : IEvent
+    public class BeginOrderExecutionEvent : Message, IEvent
     {
         public PlacedOrder Order { get; }
 

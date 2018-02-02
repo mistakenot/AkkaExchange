@@ -1,6 +1,6 @@
 ﻿namespace AkkaExchange
 {
-    public interface IEvent
+    public interface IEvent : IMessage
     {
     }
 }

@@ -2,7 +2,7 @@
 
 namespace AkkaExchange.Orders.Events
 {
-    public class MatchedOrdersEvent : IEvent
+    public class MatchedOrdersEvent : Message, IEvent
     {
         public string MatcherType { get; }
         public OrderMatchResult MatchedOrders { get; }

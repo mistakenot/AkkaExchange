@@ -62,10 +62,13 @@ namespace AkkaExchange.Orders
             {
                 var result = _orderMatcher.Match(state.OpenOrders);
 
-                return new HandlerResult(
-                    new MatchedOrdersEvent(
-                        result, 
-                        typeof(DefaultOrderMatcher).FullName));
+                if (result.Matches.Any())
+                {
+                    return new HandlerResult(
+                        new MatchedOrdersEvent(
+                            result, 
+                            typeof(DefaultOrderMatcher).FullName));
+                }
             }
 
             if (command is CompleteOrderCommand completeOrderCommand)

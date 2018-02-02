@@ -2,7 +2,7 @@
 
 namespace AkkaExchange.Orders.Events
 {
-    public class NewOrderEvent : IEvent
+    public class NewOrderEvent : Message, IEvent
     {
         public PlacedOrder Order { get; }
 

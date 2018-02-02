@@ -2,7 +2,7 @@
 
 namespace AkkaExchange.Client.Events
 {
-    public class EndConnectionEvent : IEvent
+    public class EndConnectionEvent : Message, IEvent
     {
         public Guid ClientId { get; }
         public DateTime EndedAt { get; }

@@ -2,7 +2,7 @@
 
 namespace AkkaExchange.Client.Events
 {
-    public class StartConnectionEvent : IEvent
+    public class StartConnectionEvent : Message, IEvent
     {
         public Guid ClientId { get; }
         public DateTime StartedAt { get; }

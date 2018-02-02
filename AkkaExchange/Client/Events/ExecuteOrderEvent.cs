@@ -2,7 +2,7 @@
 
 namespace AkkaExchange.Client.Events
 {
-    public class ExecuteOrderEvent : IEvent
+    public class ExecuteOrderEvent : Message, IEvent
     {
         public Guid ClientId { get; }
         public ICommand OrderCommand { get; }

@@ -2,7 +2,7 @@
 
 namespace AkkaExchange.Orders.Events
 {
-    public class RemoveOrderEvent : IEvent
+    public class RemoveOrderEvent : Message, IEvent
     {
         public Guid OrderId { get; }
 

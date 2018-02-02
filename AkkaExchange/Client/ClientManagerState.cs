@@ -4,7 +4,7 @@ using AkkaExchange.Client.Events;
 
 namespace AkkaExchange.Client
 {
-    public class ClientManagerState : IState<ClientManagerState>
+    public class ClientManagerState : Message, IState<ClientManagerState>
     {
         public IImmutableList<Guid> ClientIds { get; }
 

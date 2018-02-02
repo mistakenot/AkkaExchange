@@ -29,7 +29,7 @@ namespace AkkaExchange
                 
                 var orderBookSubscription = exchange.Queries.OrderBookState.Subscribe(s => 
                     Console.WriteLine($"Open: {s.OpenOrders.Count}, Executing: {s.ExecutingOrders.Count}, Complete: {s.CompleteOrders.Count}."));
-                var placedOrderVolumeSubscription = exchange.Queries.PlacedOrderVolumePerMinute.Subscribe(s => 
+                var placedOrderVolumeSubscription = exchange.Queries.PlacedOrderVolumePerTenSeconds.Subscribe(s => 
                     Console.WriteLine($"Volume in last minute: {s.Volume}"));
 
                 client.NewOrder(1m, 1m, OrderSide.Ask);

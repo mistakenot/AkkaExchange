@@ -12,14 +12,14 @@ namespace AkkaExchange
     {
         public IObservable<ClientManagerState> ClientManagerState { get; }
         public IObservable<OrderBookState> OrderBookState { get; }
-        public IObservable<PlacedOrderVolume> PlacedOrderVolumePerMinute { get; }
+        public IObservable<PlacedOrderVolume> PlacedOrderVolumePerTenSeconds { get; }
 
         public AkkaExchangeQueries(
             IObservable<ClientManagerState> clientManagerState,
             IObservable<OrderBookState> orderBookState, 
             IObservable<PlacedOrderVolume> placedOrderVolumePerMinute)
         {
-            PlacedOrderVolumePerMinute = placedOrderVolumePerMinute;
+            PlacedOrderVolumePerTenSeconds = placedOrderVolumePerMinute;
             ClientManagerState = clientManagerState ?? throw new ArgumentNullException(nameof(clientManagerState));
             OrderBookState = orderBookState ?? throw new ArgumentNullException(nameof(orderBookState));
         }
@@ -43,7 +43,7 @@ namespace AkkaExchange
             return new AkkaExchangeQueries(
                 clientManagerQueryFactory.Create("client-manager"),
                 orderBookQueryFactory.Create("order-book"),
-                placedOrderVolumeFactory.Create("order-book", TimeSpan.FromMinutes(1)));
+                placedOrderVolumeFactory.Create("order-book", TimeSpan.FromSeconds(10)));
         }
     }
 }
