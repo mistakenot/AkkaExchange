@@ -2,7 +2,7 @@
 
 namespace AkkaExchange.Client.Commands
 {
-    public class EndConnectionCommand : ICommand
+    public class EndConnectionCommand : Message, ICommand
     {
         public Guid ClientId { get; }
 

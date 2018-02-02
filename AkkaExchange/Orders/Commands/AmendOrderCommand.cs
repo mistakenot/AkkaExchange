@@ -2,7 +2,7 @@
 
 namespace AkkaExchange.Orders.Commands
 {
-    public class AmendOrderCommand : ICommand
+    public class AmendOrderCommand : Message, ICommand
     {
         public Guid OrderId { get; }
         public Order Order { get; }

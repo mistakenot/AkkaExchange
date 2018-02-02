@@ -2,7 +2,7 @@
 
 namespace AkkaExchange.Execution.Commands
 {
-    public class UpdateOrderExecutionStatusCommand : ICommand
+    public class UpdateOrderExecutionStatusCommand : Message, ICommand
     {
         public OrderExecutorStatus Status { get; }
         public Guid OrderId { get; }

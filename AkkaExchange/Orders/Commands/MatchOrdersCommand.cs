@@ -1,6 +1,6 @@
 ﻿namespace AkkaExchange.Orders.Commands
 {
-    public class MatchOrdersCommand : ICommand
+    public class MatchOrdersCommand : Message, ICommand
     {
     }
 }

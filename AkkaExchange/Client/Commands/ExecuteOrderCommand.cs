@@ -2,7 +2,7 @@
 
 namespace AkkaExchange.Client.Commands
 {
-    public class ExecuteOrderCommand : ICommand
+    public class ExecuteOrderCommand : Message, ICommand
     {
         public Guid ClientId { get; }
         public ICommand OrderCommand { get; }

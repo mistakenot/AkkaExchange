@@ -3,7 +3,7 @@ using AkkaExchange.Orders;
 
 namespace AkkaExchange.Execution.Commands
 {
-    public class BeginOrderExecutionCommand : ICommand
+    public class BeginOrderExecutionCommand : Message, ICommand
     {
         public PlacedOrder Order { get; }
 
