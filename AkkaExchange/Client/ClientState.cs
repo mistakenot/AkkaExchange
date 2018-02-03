@@ -12,12 +12,20 @@ namespace AkkaExchange.Client
         public DateTime? StartedAt { get; }
         public DateTime? EndedAt { get; }
         public decimal Balance { get; }
+        public decimal Amount { get; }
         public IImmutableList<ICommand> OrderCommandHistory { get; }
 
         public static readonly ClientState Empty = new ClientState(Guid.Empty);
 
         public ClientState(Guid clientId)
-            : this(clientId, ClientStatus.Pending, null, null, ImmutableList<ICommand>.Empty, 100m)
+            : this(
+                clientId,
+                ClientStatus.Pending, 
+                null, 
+                null, 
+                ImmutableList<ICommand>.Empty, 
+                100m,
+                0m)
         {
             
         }
@@ -28,7 +36,8 @@ namespace AkkaExchange.Client
             DateTime? startedAt, 
             DateTime? endedAt, 
             IImmutableList<ICommand> orderCommandHistory, 
-            decimal balance)
+            decimal balance,
+            decimal amount)
         {
             ClientId = clientId;
             Status = status;
@@ -36,6 +45,7 @@ namespace AkkaExchange.Client
             EndedAt = endedAt;
             OrderCommandHistory = orderCommandHistory;
             Balance = balance;
+            Amount = amount;
         }
 
         public ClientState Update(IEvent evnt)
@@ -49,7 +59,8 @@ namespace AkkaExchange.Client
                     startConnectionEvent.StartedAt,
                     null,
                     OrderCommandHistory,
-                    Balance);
+                    Balance,
+                    Amount);
             }
 
             if (evnt is EndConnectionEvent endConnectionEvent &&
@@ -61,7 +72,8 @@ namespace AkkaExchange.Client
                     StartedAt,
                     endConnectionEvent.EndedAt,
                     OrderCommandHistory,
-                    Balance);
+                    Balance,
+                    Amount);
             }
             
             if (evnt is ExecuteOrderEvent executeOrderEvent)
@@ -72,7 +84,8 @@ namespace AkkaExchange.Client
                     StartedAt,
                     EndedAt,
                     OrderCommandHistory.Add(executeOrderEvent.OrderCommand),
-                    Balance);
+                    Balance,
+                    Amount);
             }
 
             if (evnt is CompleteOrderEvent completeOrderEvent &&
@@ -85,8 +98,11 @@ namespace AkkaExchange.Client
                     EndedAt,
                     OrderCommandHistory,
                     completeOrderEvent.Side == OrderSide.Bid ? 
-                        Balance - completeOrderEvent.Amount : 
-                        Balance + completeOrderEvent.Amount);
+                        Balance - completeOrderEvent.TotalPrice() : 
+                        Balance + completeOrderEvent.TotalPrice(),
+                    completeOrderEvent.Side == OrderSide.Bid ? 
+                        Amount + completeOrderEvent.Amount :
+                        Amount - completeOrderEvent.Amount);
             }
             return this;
         }

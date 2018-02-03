@@ -7,13 +7,18 @@ namespace AkkaExchange.Client.Events
     {
         public OrderSide Side { get; }
         public decimal Amount { get; }
+        public decimal Price { get; }
         
         public CompleteOrderEvent(
             OrderSide side,
-            decimal amount)
+            decimal amount,
+            decimal price)
         {
             Side = side;
             Amount = amount;
+            Price = price;
         }
+
+        public decimal TotalPrice() => Amount * Price;
     }
 }

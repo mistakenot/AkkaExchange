@@ -3,7 +3,7 @@ using AkkaExchange.Execution.Events;
 
 namespace AkkaExchange.Execution
 {
-    public class OrderExecutorState : IState<OrderExecutorState>
+    public class OrderExecutorState : Message, IState<OrderExecutorState>
     {
         public Guid OrderId { get; }
         public OrderExecutorStatus Status { get; }

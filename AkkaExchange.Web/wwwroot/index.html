@@ -28,6 +28,8 @@
                 <p>Is Connected: <strong data-bind="text: isConnected"></strong></p>
                 <p>Connection Id: <strong data-bind="text: connectionId"></strong></p>
                 <p>Connected At: <strong data-bind="text: connectedAt"></strong></p>
+                <p>Balance: <strong data-bind="text: balance"></strong></p>
+                <p>Asset Amount: <strong data-bind="text: amount"></strong></p>
             </div>
         </div>
     </div>
@@ -39,6 +41,8 @@
         self.isConnected = ko.computed(() => self.clientState().status)
         self.connectedAt = ko.computed(() => self.isConnected() ? self.clientState().startedAt : "n/a")
         self.connectionId = ko.computed(() => self.clientState().clientId)
+        self.balance = ko.computed(() => self.clientState().balance)
+        self.amount = ko.computed(() => self.clientState().amount)
     }
 
     var vm = new VM();
@@ -59,7 +63,7 @@
                             break;
                     }
                     console.log(data);
-                    term.echo(JSON.stringify(data));
+                    term.echo(data.type);
                 });
 
             connection.start()

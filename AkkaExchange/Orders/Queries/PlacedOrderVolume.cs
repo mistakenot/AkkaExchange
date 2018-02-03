@@ -5,7 +5,7 @@ using AkkaExchange.Orders.Events;
 
 namespace AkkaExchange.Orders.Queries
 {
-    public class PlacedOrderVolume
+    public class PlacedOrderVolume : Message
     {
         public DateTime From { get; }
         public DateTime Until { get; }

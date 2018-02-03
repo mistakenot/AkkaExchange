@@ -32,6 +32,7 @@ namespace AkkaExchange.Tests.Client
         [Fact]
         public void ClientState_ReceivesEndConnectionEvent_Ok()
         {
+            // TODO This isn't a good thing to do as it couples your tests together.
             ClientState_ReceivesStartConnectionEvent_Ok();
 
             var evnt = new EndConnectionEvent(_clientId, DateTime.UtcNow);
@@ -62,11 +63,35 @@ namespace AkkaExchange.Tests.Client
         {
             ClientState_ReceivesStartConnectionEvent_Ok();
 
-            var evnt = new CompleteOrderEvent(OrderSide.Bid, 10m);
+            var evnt = new CompleteOrderEvent(OrderSide.Bid, 10m, 1m);
 
             _subject = _subject.Update(evnt);
 
             Assert.Equal(90, _subject.Balance);
+        }
+
+        [Fact]
+        public void ClientState_ReceivesCompleteOrderEventBid_UpdatesAmountOk()
+        {
+            ClientState_ReceivesStartConnectionEvent_Ok();
+
+            var evnt = new CompleteOrderEvent(OrderSide.Bid, 10m, 1m);
+
+            _subject = _subject.Update(evnt);
+
+            Assert.Equal(10, _subject.Amount);
+        }
+
+        [Fact]
+        public void ClientState_ReceivesCompleteOrderEventAsk_UpdatesAmountOk()
+        {
+            ClientState_ReceivesStartConnectionEvent_Ok();
+
+            var evnt = new CompleteOrderEvent(OrderSide.Ask, 10m, 1m);
+
+            _subject = _subject.Update(evnt);
+
+            Assert.Equal(-10, _subject.Amount);
         }
     }
 }
