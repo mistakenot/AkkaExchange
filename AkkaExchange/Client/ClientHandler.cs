@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using AkkaExchange.Client.Commands;
 using AkkaExchange.Client.Events;
 using AkkaExchange.Orders;
@@ -68,7 +69,7 @@ namespace AkkaExchange.Client
                     return new HandlerResult(
                         $"Balance too low.");
                 }
-
+                
                 return new HandlerResult(
                     new ExecuteOrderEvent(
                         executeOrderCommand.ClientId, 

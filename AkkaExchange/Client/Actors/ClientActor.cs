@@ -3,6 +3,7 @@ using AkkaExchange.Shared.Actors;
 using AkkaExchange.Client.Events;
 using System;
 using AkkaExchange.Orders;
+using AkkaExchange.Utils;
 
 namespace AkkaExchange.Client.Actors
 {
@@ -13,8 +14,9 @@ namespace AkkaExchange.Client.Actors
 
         public ClientActor(
             ICommandHandler<ClientState> handler,
+            IGlobalActorRefs globalActorRefs,
             ClientState defaultState) 
-            : base(handler, defaultState, defaultState.ClientId.ToString())
+            : base(handler, globalActorRefs, defaultState, defaultState.ClientId.ToString())
         {
             _orderBookActor = Context.ActorSelection("/user/order-book");
         }

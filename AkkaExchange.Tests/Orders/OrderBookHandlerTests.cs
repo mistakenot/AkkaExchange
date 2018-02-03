@@ -58,7 +58,7 @@ namespace AkkaExchange.Tests.Orders
                 OrderBookState.Empty,
                 new MatchOrdersCommand());
 
-            Assert.False(result.Success);
+            Assert.True(result.Success);
         }
 
         [Fact]

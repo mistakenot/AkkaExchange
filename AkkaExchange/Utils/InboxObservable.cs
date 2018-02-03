@@ -31,7 +31,6 @@ namespace AkkaExchange.Utils
                         while (!_tokenSource.IsCancellationRequested)
                         {
                             var msg = await inbox.ReceiveAsync();
-
                             if (msg is Status.Failure failure && failure.Cause is TimeoutException)
                             {
                                 break;

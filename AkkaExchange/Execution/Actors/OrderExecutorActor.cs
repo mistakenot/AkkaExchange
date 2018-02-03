@@ -4,6 +4,7 @@ using Akka.Actor;
 using AkkaExchange.Shared.Actors;
 using AkkaExchange.Execution.Commands;
 using AkkaExchange.Execution.Events;
+using AkkaExchange.Utils;
 
 namespace AkkaExchange.Execution.Actors
 {
@@ -16,8 +17,14 @@ namespace AkkaExchange.Execution.Actors
         public OrderExecutorActor(
             IOrderExecutor orderExecutor,
             ICommandHandler<OrderExecutorState> handler,
+            IGlobalActorRefs globalActorRefs,
             IActorRef orderExecutorManager,
-            OrderExecutorState defaultState) : base(handler, defaultState, defaultState.OrderId.ToString())
+            OrderExecutorState defaultState) : 
+                base(
+                    handler, 
+                    globalActorRefs, 
+                    defaultState, 
+                    defaultState.OrderId.ToString())
         {
             _orderExecutor = orderExecutor;
             _orderExecutorManager = orderExecutorManager ?? throw new ArgumentNullException(nameof(orderExecutorManager));

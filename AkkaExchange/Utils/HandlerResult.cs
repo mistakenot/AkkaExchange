@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace AkkaExchange.Utils
 {
-    public class HandlerResult
+    public class HandlerResult : Message
     {
         public bool Success { get; }
         public bool WasHandled { get; }

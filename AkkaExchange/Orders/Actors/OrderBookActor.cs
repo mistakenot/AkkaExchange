@@ -20,6 +20,7 @@ namespace AkkaExchange.Orders.Actors
             IGlobalActorRefs globalActorRefs)
             : base(
                 commandHandler,
+                globalActorRefs,
                 OrderBookState.Empty,
                 Constants.OrderBookPersistenceId)
         {

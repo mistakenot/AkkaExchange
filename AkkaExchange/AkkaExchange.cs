@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.Configuration;
@@ -14,6 +15,7 @@ using AkkaExchange.Client.Commands;
 using AkkaExchange.Execution.Actors;
 using AkkaExchange.Orders.Actors;
 using AkkaExchange.Orders.Commands;
+using AkkaExchange.Shared.Actors;
 using AkkaExchange.Shared.Events;
 using AkkaExchange.Shared.Queries;
 using AkkaExchange.Utils;
@@ -46,15 +48,6 @@ namespace AkkaExchange
             var readJournal = PersistenceQuery.Get(_system).ReadJournalFor<SqlReadJournal>("akka.persistence.query.journal.sql");
             
             _errorEventSubscriber = Inbox.Create(_system);
-            var subscritpionSuccess = _system.EventStream.Subscribe(
-                _errorEventSubscriber.Receiver, 
-                typeof(HandlerErrorEvent));
-
-            if (subscritpionSuccess)
-            {
-                // TODO make this less shit.
-                throw new Exception("Subscription failed.");
-            }
 
             globalActorRefs.ErrorEventSubscriber = _errorEventSubscriber.Receiver;
 
@@ -116,13 +109,17 @@ namespace AkkaExchange
             var clientActor = await inbox.ReceiveAsync();
             var eventsQuery = _eventsQueryFactory.Create(persistenceId);
             var stateQuery = _clientStateQueryFactory.Create(persistenceId);
+            var errorQuery = Queries
+                .HandlerErrorEvents
+                .Select(e => e.Result);
 
             return new AkkaExchangeClient(
                 command.ClientId,
                 inbox,
                 clientActor as IActorRef,
                 eventsQuery,
-                stateQuery);
+                stateQuery,
+                errorQuery);
         }
 
         public async Task EndConnection(Guid connectionId)

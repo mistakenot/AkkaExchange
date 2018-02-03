@@ -9,16 +9,20 @@ namespace AkkaExchange.Client.Actors
     public class ClientManagerActor : BaseActor<ClientManagerState>
     {
         private readonly ICommandHandler<ClientState> _clientCommandHandler;
+        private readonly IGlobalActorRefs _globalActorRefs;
 
         public ClientManagerActor(
             ICommandHandler<ClientManagerState> handler,
-            ICommandHandler<ClientState> clientCommandHandler) 
+            ICommandHandler<ClientState> clientCommandHandler,
+            IGlobalActorRefs globalActorRefs)
             : base(
                   handler,
-                  ClientManagerState.Empty, 
+                  globalActorRefs,
+                  ClientManagerState.Empty,
                   Constants.ClientManagerPersistenceId)
         {
             _clientCommandHandler = clientCommandHandler;
+            _globalActorRefs = globalActorRefs;
         }
 
         protected override void OnCommand(object message)
@@ -56,7 +60,7 @@ namespace AkkaExchange.Client.Actors
         private IActorRef CreateClient(StartConnectionEvent startConnectionEvent)
         {
             var clientState = new ClientState(startConnectionEvent.ClientId);
-            var props = Props.Create<ClientActor>(_clientCommandHandler, clientState);
+            var props = Props.Create<ClientActor>(_clientCommandHandler, _globalActorRefs, clientState);
             var child = Context.ActorOf(props, startConnectionEvent.ClientId.ToString());
 
             child.Tell(
