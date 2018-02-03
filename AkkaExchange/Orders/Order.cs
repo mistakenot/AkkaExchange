@@ -25,5 +25,7 @@ namespace AkkaExchange.Orders
             Side = side;
             ClientId = clientId;
         }
+
+        public decimal TotalPrice() => Amount * Price;
     }
 }

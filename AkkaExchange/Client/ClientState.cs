@@ -30,7 +30,7 @@ namespace AkkaExchange.Client
             
         }
 
-        private ClientState(
+        public ClientState(
             Guid clientId, 
             ClientStatus status, 
             DateTime? startedAt, 

@@ -1,4 +1,5 @@
 ﻿using System;
+using Akka.Actor;
 using Akka.Persistence.Query;
 using Akka.Streams;
 using Akka.Streams.Dsl;

@@ -7,6 +7,7 @@ namespace AkkaExchange.Utils
         IActorRef OrderBook { get; }
         IActorRef ClientManager { get; }
         IActorRef OrderExecutorManager { get; }
+        IActorRef ErrorEventSubscriber { get; }
     }
 
     public class GlobalActorRefs : IGlobalActorRefs
@@ -14,5 +15,6 @@ namespace AkkaExchange.Utils
         public IActorRef OrderBook { get; set; }
         public IActorRef ClientManager { get; set; }
         public IActorRef OrderExecutorManager { get; set; }
+        public IActorRef ErrorEventSubscriber { get; set; }
     }
 }

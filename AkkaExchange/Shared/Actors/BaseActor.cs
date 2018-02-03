@@ -1,5 +1,7 @@
 ﻿using System;
 using Akka.Persistence;
+using AkkaExchange.Shared.Events;
+using AkkaExchange.Utils;
 
 namespace AkkaExchange.Shared.Actors
 {
@@ -9,17 +11,20 @@ namespace AkkaExchange.Shared.Actors
         public override string PersistenceId { get; }
 
         public BaseActor(
-            ICommandHandler<TState> handler, 
+            ICommandHandler<TState> handler,
+            IGlobalActorRefs globalActorRefs,
             TState defaultState, 
             string persistenceId)
         {
             PersistenceId = persistenceId;
 
             _handler = handler ?? throw new ArgumentNullException(nameof(handler));
+            _globalActorRefs = globalActorRefs;
             _state = defaultState ?? throw new ArgumentNullException(nameof(defaultState));
         }
 
         private readonly ICommandHandler<TState> _handler;
+        private readonly IGlobalActorRefs _globalActorRefs;
         private TState _state;
 
         protected override void OnCommand(object message)
@@ -35,6 +40,11 @@ namespace AkkaExchange.Shared.Actors
                 else
                 {
                     // TODO send errors to client
+                    _globalActorRefs.ErrorEventSubscriber.Tell(
+                        new HandlerErrorEvent(
+                            PersistenceId,
+                            handlerResult),
+                        Self);
                 }
             }
         }

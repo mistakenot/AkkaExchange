@@ -7,12 +7,14 @@ using Akka.DI.Core;
 using Akka.Persistence.Query;
 using Akka.Persistence.Query.Sql;
 using Akka.Streams;
+using Akka.Streams.Dsl;
 using AkkaExchange.Client;
 using AkkaExchange.Client.Actors;
 using AkkaExchange.Client.Commands;
 using AkkaExchange.Execution.Actors;
 using AkkaExchange.Orders.Actors;
 using AkkaExchange.Orders.Commands;
+using AkkaExchange.Shared.Events;
 using AkkaExchange.Shared.Queries;
 using AkkaExchange.Utils;
 using Autofac;
@@ -30,6 +32,7 @@ namespace AkkaExchange
         private readonly IEventsQueryFactory _eventsQueryFactory;
         private readonly StateQueryFactory<ClientState> _clientStateQueryFactory;
         private readonly IActorRef _orderExecutorManager;
+        private readonly Inbox _errorEventSubscriber;
 
         public AkkaExchange(ContainerBuilder container, Config config)
         {
@@ -41,8 +44,24 @@ namespace AkkaExchange
 
             var materializer = ActorMaterializer.Create(_system);
             var readJournal = PersistenceQuery.Get(_system).ReadJournalFor<SqlReadJournal>("akka.persistence.query.journal.sql");
+            
+            _errorEventSubscriber = Inbox.Create(_system);
+            var subscritpionSuccess = _system.EventStream.Subscribe(
+                _errorEventSubscriber.Receiver, 
+                typeof(HandlerErrorEvent));
 
-            Queries = AkkaExchangeQueries.Create(materializer, readJournal);
+            if (subscritpionSuccess)
+            {
+                // TODO make this less shit.
+                throw new Exception("Subscription failed.");
+            }
+
+            globalActorRefs.ErrorEventSubscriber = _errorEventSubscriber.Receiver;
+
+            Queries = AkkaExchangeQueries.Create(
+                materializer, 
+                readJournal,
+                _errorEventSubscriber);
 
             // Used in client actor
             container.RegisterInstance(Queries.OrderBookState);

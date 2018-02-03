@@ -1,6 +1,8 @@
 ﻿using System;
 using AkkaExchange.Client.Commands;
 using AkkaExchange.Client.Events;
+using AkkaExchange.Orders;
+using AkkaExchange.Orders.Commands;
 using AkkaExchange.Utils;
 
 namespace AkkaExchange.Client
@@ -59,13 +61,21 @@ namespace AkkaExchange.Client
                         $"Client is not connected.");
                 }
 
+                if (executeOrderCommand.OrderCommand is NewOrderCommand newOrderCommand &&
+                    newOrderCommand.Order.Side == OrderSide.Bid &&
+                    newOrderCommand.Order.TotalPrice() > state.Balance)
+                {
+                    return new HandlerResult(
+                        $"Balance too low.");
+                }
+
                 return new HandlerResult(
                     new ExecuteOrderEvent(
                         executeOrderCommand.ClientId, 
                         executeOrderCommand.OrderCommand));
             }
 
-            if (command is CompleteOrderCommand completeOrderCommand)
+            if (command is Client.Commands.CompleteOrderCommand completeOrderCommand)
             {
                 if (state.Status != ClientStatus.Connected)
                 {
