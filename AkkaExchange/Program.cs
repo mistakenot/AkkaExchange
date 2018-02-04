@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Akka.Actor;
 using Akka.Configuration;
 using AkkaExchange.Orders;
 using AkkaExchange.Utils;
@@ -32,8 +33,8 @@ namespace AkkaExchange
                     Console.WriteLine($"Open: {s.OpenOrders.Count}, Executing: {s.ExecutingOrders.Count}, Complete: {s.CompleteOrders.Count}."));
                 var placedOrderVolumeSubscription = exchange.Queries.PlacedOrderVolumePerTenSeconds.Subscribe(s => 
                     Console.WriteLine($"Volume in last minute: {s.Volume}"));
-                var errorSubscription = client.Errors.Subscribe(e => 
-                    Console.WriteLine($"Error: {e.Errors.First()}"));
+                var errorSubscription = exchange.Queries.HandlerErrorEvents.Subscribe(e => 
+                    Console.WriteLine($"Error: {e.Result.Errors.First()}"));
 
                 client.NewOrder(1m, 1m, OrderSide.Ask);
                 client.NewOrder(200000m, 1m, OrderSide.Bid);

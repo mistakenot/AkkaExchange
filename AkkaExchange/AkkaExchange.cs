@@ -34,7 +34,6 @@ namespace AkkaExchange
         private readonly IEventsQueryFactory _eventsQueryFactory;
         private readonly StateQueryFactory<ClientState> _clientStateQueryFactory;
         private readonly IActorRef _orderExecutorManager;
-        private readonly Inbox _errorEventSubscriber;
 
         public AkkaExchange(ContainerBuilder container, Config config)
         {
@@ -47,14 +46,11 @@ namespace AkkaExchange
             var materializer = ActorMaterializer.Create(_system);
             var readJournal = PersistenceQuery.Get(_system).ReadJournalFor<SqlReadJournal>("akka.persistence.query.journal.sql");
             
-            _errorEventSubscriber = Inbox.Create(_system);
-
-            globalActorRefs.ErrorEventSubscriber = _errorEventSubscriber.Receiver;
-
             Queries = AkkaExchangeQueries.Create(
                 materializer, 
-                readJournal,
-                _errorEventSubscriber);
+                readJournal);
+
+            globalActorRefs.ErrorEventSubscriber = Queries.HandlerErrorEventsSource;
 
             // Used in client actor
             container.RegisterInstance(Queries.OrderBookState);

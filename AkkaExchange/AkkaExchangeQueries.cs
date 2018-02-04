@@ -3,6 +3,7 @@ using System.Reactive.Linq;
 using Akka.Actor;
 using Akka.Persistence.Query;
 using Akka.Streams;
+using Akka.Streams.Dsl;
 using AkkaExchange.Client;
 using AkkaExchange.Orders;
 using AkkaExchange.Orders.Queries;
@@ -19,23 +20,25 @@ namespace AkkaExchange
         public IObservable<OrderBookState> OrderBookState { get; }
         public IObservable<PlacedOrderVolume> PlacedOrderVolumePerTenSeconds { get; }
         public IObservable<HandlerErrorEvent> HandlerErrorEvents { get; }
+        public IActorRef HandlerErrorEventsSource { get; }
 
         public AkkaExchangeQueries(
             IObservable<ClientManagerState> clientManagerState,
             IObservable<OrderBookState> orderBookState, 
             IObservable<PlacedOrderVolume> placedOrderVolumePerMinute,
-            IObservable<HandlerErrorEvent> handlerErrorEvents)
+            IObservable<HandlerErrorEvent> handlerErrorEvents,
+            IActorRef handlerErrorEventsSource)
         {
             PlacedOrderVolumePerTenSeconds = placedOrderVolumePerMinute;
             HandlerErrorEvents = handlerErrorEvents ?? throw new ArgumentNullException(nameof(handlerErrorEvents));
+            HandlerErrorEventsSource = handlerErrorEventsSource ?? throw new ArgumentNullException(nameof(handlerErrorEventsSource));
             ClientManagerState = clientManagerState ?? throw new ArgumentNullException(nameof(clientManagerState));
             OrderBookState = orderBookState ?? throw new ArgumentNullException(nameof(orderBookState));
         }
 
         internal static AkkaExchangeQueries Create(
             IMaterializer materializer, 
-            IEventsByPersistenceIdQuery eventsByPersistenceIdQuery,
-            Inbox errorEventInbox)
+            IEventsByPersistenceIdQuery eventsByPersistenceIdQuery)
         {
             var clientManagerQueryFactory = new StateQueryFactory<ClientManagerState>(
                 eventsByPersistenceIdQuery, 
@@ -51,15 +54,15 @@ namespace AkkaExchange
                 eventsByPersistenceIdQuery,
                 materializer);
             
-            var handlerErrorObservable = new InboxObservable(errorEventInbox)
-                .Where(e => e is HandlerErrorEvent)
-                .Select(e => e as HandlerErrorEvent);
+            var handlerErrorFactory = new HandlerErrorQueryFactory(materializer);
+            var (source, observable) = handlerErrorFactory.Create();
 
             return new AkkaExchangeQueries(
                 clientManagerQueryFactory.Create("client-manager"),
                 orderBookQueryFactory.Create("order-book"),
                 placedOrderVolumeFactory.Create("order-book", TimeSpan.FromSeconds(10)),
-                handlerErrorObservable);
+                observable,
+                source);
         }
     }
 }
