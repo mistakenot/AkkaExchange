@@ -1,6 +1,7 @@
 using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.Streams;
 using Akka.Streams.Dsl;
@@ -19,34 +20,39 @@ namespace AkkaExchange.Shared.Queries
             _materializer = materializer;
         }
 
-        public (IActorRef, IObservable<HandlerErrorEvent>) Create()
+        public HandlerErrorQuery Create()
         {
             var source = Source.ActorRef<HandlerErrorEvent>(10, OverflowStrategy.DropNew);
-            var sink = Sink.AsPublisher<HandlerErrorEvent>(false);
-            var graph = source.ToMaterialized(sink, Keep.Both);
-            var (actor, publisher) = graph.Run(_materializer);
             var subject = new Subject<HandlerErrorEvent>();
-            var subscriber = new Subscriber(subject);
+            var sink = Sink.ForEach<HandlerErrorEvent>(subject.OnNext);
+            var graph = source.ToMaterialized(sink, Keep.Both);
+            var (actor, task) = graph.Run(_materializer);
 
-            publisher.Subscribe(subscriber);
-
-            return (actor, subject);
+            return new HandlerErrorQuery(actor, task, subject);
         }
-        
-        /// Converts between an Akka subscriptions and Rx observables.
-        class Subscriber : ISubscriber<HandlerErrorEvent>
+    }
+
+    public class HandlerErrorQuery : IDisposable
+    {
+
+        public IActorRef Source { get; }
+        public IObservable<HandlerErrorEvent> Observable { get; }
+        private readonly Task _task;
+
+        public HandlerErrorQuery(
+            IActorRef source, 
+            Task task, 
+            IObservable<HandlerErrorEvent> observable)
         {
-            private readonly IObserver<HandlerErrorEvent> _next;
+            Source = source;
+            Observable = observable;
+            
+            _task = task;
+        }
 
-            public Subscriber(IObserver<HandlerErrorEvent> next)
-            {
-                _next = next;
-            }
-
-            public void OnComplete() => _next.OnCompleted();
-            public void OnError(Exception cause) => _next.OnError(cause);
-            public void OnNext(HandlerErrorEvent element) => _next.OnNext(element);
-            public void OnSubscribe(ISubscription subscription) {}
+        public void Dispose()
+        {
+            _task.Dispose();
         }
     }
 }

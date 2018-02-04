@@ -14,18 +14,22 @@ namespace AkkaExchange.Tests.Shared.Queries
     public class HandlerErrorQueryFactoryTests : TestKit
     {
         [Fact]
-        public void HandlerErrorQueryFactory_EmitsEvent_Ok()
+        public async Task HandlerErrorQueryFactory_EmitsEvent_Ok()
         {
             using (var materializer = Sys.Materializer())
             {
                 var subject = new HandlerErrorQueryFactory(materializer);
-                var (actor, observable) = subject.Create();
+                var query = subject.Create();
                 var msg = new HandlerErrorEvent("", HandlerResult.NotHandled);
                 var subscriber = new Mock<IObserver<HandlerErrorEvent>>();
-                var subscription = observable.Subscribe(subscriber.Object);
+                var subscription = query.Observable.Subscribe(subscriber.Object);
                 
-                actor.Tell(msg, ActorRefs.Nobody);
+                query.Source.Tell(msg, ActorRefs.Nobody);
                 
+                // Graph is run async, so we need to give it a chance
+                //  to warm up.
+                await Task.Delay(100);
+
                 subscriber.Verify(s => s.OnNext(It.IsAny<HandlerErrorEvent>()));
             }
         }

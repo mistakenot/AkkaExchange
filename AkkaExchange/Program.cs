@@ -38,8 +38,6 @@ namespace AkkaExchange
 
                 client.NewOrder(1m, 1m, OrderSide.Ask);
                 client.NewOrder(200000m, 1m, OrderSide.Bid);
-                client.NewOrder(200000m, 1m, OrderSide.Bid);
-                client.NewOrder(200000m, 1m, OrderSide.Bid);
 
                 Console.ReadLine();
 

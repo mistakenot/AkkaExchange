@@ -55,14 +55,14 @@ namespace AkkaExchange
                 materializer);
             
             var handlerErrorFactory = new HandlerErrorQueryFactory(materializer);
-            var (source, observable) = handlerErrorFactory.Create();
+            var handlerErrorQuery = handlerErrorFactory.Create();
 
             return new AkkaExchangeQueries(
                 clientManagerQueryFactory.Create("client-manager"),
                 orderBookQueryFactory.Create("order-book"),
                 placedOrderVolumeFactory.Create("order-book", TimeSpan.FromSeconds(10)),
-                observable,
-                source);
+                handlerErrorQuery.Observable,
+                handlerErrorQuery.Source);
         }
     }
 }

@@ -107,6 +107,7 @@ namespace AkkaExchange
             var stateQuery = _clientStateQueryFactory.Create(persistenceId);
             var errorQuery = Queries
                 .HandlerErrorEvents
+                .Where(e => e.Name == persistenceId)
                 .Select(e => e.Result);
 
             return new AkkaExchangeClient(
