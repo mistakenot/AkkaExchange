@@ -34,18 +34,18 @@ The core abstractions are:
 - [`ICommand`](AkkaExchange/ICommand.cs) which represents a client's request to change part of the system state.
 - [`ICommandHandler`](AkkaExchange/ICommandHandler.cs) which is a function of form `(State, Command) -> HandlerResult`. This validates a command against the current state of an entity and either returns `Success: Event` or `Error: List of Strings`.
 - [`IState`](AkkaExchange/IState.cs) which is the result of folding over an event stream to get the current state of an entity.
-- `IState.Update` which is a function of form `(Event) -> State`. This updates the state after a successful event.
-- `IEvent` which represents the result of a successful `ICommand` that has been persisted into the event log.
+- [`IState.Update`](AkkaExchange/IState.cs) which is a function of form `(Event) -> State`. This updates the state after a successful event.
+- [`IEvent`](AkkaExchange/IEvent.cs) which represents the result of a successful `ICommand` that has been persisted into the event log.
 - Queries, represented as `IObservable<T>` instances. This is how a subscriber can receive state updates from the system.
 
 # Implementation
 The project is implemented using .NET Core, C# and Akka.NET (Actors, Persistence & Streams). Although there is a Test project, I haven't been rigourously using TDD.
-Furthermore, there is a `AkkaExchange.Web` project, which is intended to be a basic web cli that allows you to connect as a client and send orders to the exchange.
+Furthermore, there is a [`AkkaExchange.Web`](AkkaExchange.Web) project, which is intended to be a basic web cli that allows you to connect as a client and send orders to the exchange.
 
 # Todo
 As far as the core objective of this project goes, it is more or less complete. The main thing left to do is to get feedback from subject matter experts to review how well I've implemented the core concepts of Event Sourcing and CQRS.
 That aside, there are a few nice-to-dos that I would like to find time to tie up. Many of these are tied to the "Lessons Learnt" section.
-- [ ] Figure out what a `ICommandHandler` should really look like. Is it appropriate to return errors here? Should you provide the new State alongside the Event?
+- [ ] Figure out what a [`ICommandHandler`](AkkaExchange/ICommandHandler.cs) should really look like. Is it appropriate to return errors here? Should you provide the new State alongside the Event?
 - [ ] Better improve the consistency charactistics of the system. There are currently many oppotunities to screw your state up.
 - [ ] Develop client to be a bit more mature and fully featured, showing charts for price, volume, order history etc.
 - [ ] Rewrite core domain code in pure F#. (See below.)
@@ -55,7 +55,7 @@ That aside, there are a few nice-to-dos that I would like to find time to tie up
 
 # Lessons Learnt
 ## Functional Programming
-The style of coding that you end up getting pushed towards would look quite strange to someone who has only ever done Object-Orientated Programming. One set of examples are the classes that implement `IState`. Here's an example from the `ClientState` class:
+The style of coding that you end up getting pushed towards would look quite strange to someone who has only ever done Object-Orientated Programming. One set of examples are the classes that implement [`IState`](AkkaExchange/IState.cs). Here's an example from the [`ClientState`](AkkaExchange/Client/ClientState.cs) class:
 ````
 public class ClientState : Message, IState<ClientState>
 {
@@ -116,7 +116,7 @@ Instead of you components and services depending on a library of `interface`s, t
 
 Instead of starting your design by thinking about what the core Interfaces should look like, you start your design by thinking about what you core Commands and Events look like (see: Event Storming).
 
-Instead of the `Client` class implementing an interface that might look like this:
+Instead of the [`Client`](AkkaExchange/Client/ClientState.cs) class implementing an interface that might look like this:
 ````
 interface IClient
 {
@@ -133,7 +133,7 @@ class EndConnectionEvent { ... }
 class ExecuteOrderEvent { ... }
 class CompleteOrderEvent { ... }
 ````
-The technique we use to do this is called Pattern Matching. C# doesn't have great support for this (yet), so we end up having to abuse `if` statements. F# however is well build for this sort of thing and interops pretty seamlessly with C#. You may not understand F#, but compare the `Update` function in the `ClientState` class to this:
+The technique we use to do this is called Pattern Matching. C# doesn't have great support for this (yet), so we end up having to abuse `if` statements. F# however is well build for this sort of thing and interops pretty seamlessly with C#. You may not understand F#, but compare the `Update` function in the [`ClientState`](AkkaExchange/Client/ClientState.cs) class to this:
 ````
 let update state event = 
     match event with
@@ -153,15 +153,15 @@ Anyway, as much as a F# fanboy that I may be, you could carry on fine with your 
 ## Test Driven Development
 One regret of the project was that I didn't use TDD more effectively. Often when I ran into a problem I didn't understand (e.g. creating an Akka Stream from an `IActorRef` source), I ended up writing a bunch of tests anyway to help me narrow down the source of the issue.
 
-The functional, state-machine nature of the `ICommandHandler`s and `IState.Update` functions in particular lend themselves very well to simple unit testing as you don't have to worry much about how you get into your initial "Arrange" state. This is one of the big advantages of immutable programming. 
+The functional, state-machine nature of the [`ICommandHandler`](AkkaExchange/ICommandHandler.cs)s and `IState.Update` functions in particular lend themselves very well to simple unit testing as you don't have to worry much about how you get into your initial "Arrange" state. This is one of the big advantages of immutable programming. 
 
 When writing code in a mutable OO form, your state is hidden and encapsulated inside a class. The class then exposes a domain specific API, in the form of Methods, that control how the internal state can be modified.
 
 The difficulty with this approach is that it can make it difficult to write isolated unit tests. In order to get your class from its default state to state Z, you often have to execute Methods X and Y beforehand. This introduces temporal dependencies into your code that makes your unit tests more coupled and harder to reason about. When you break method X, don't be surprised if the tests that check methods Y and Z also break.
 
-Seperating your state from your functionality makes this a lot easier without affecting the strong consistency characteristics that you get from traditional encapsulation. Note: the `IState` classes aren't good examples of this as the encapsulate both state and functionality. The `ICommandHandler` methods are a better example of what I mean.
+Seperating your state from your functionality makes this a lot easier without affecting the strong consistency characteristics that you get from traditional encapsulation. Note: the [`IState`](AkkaExchange/IState.cs) classes aren't good examples of this as the encapsulate both state and functionality. The [`ICommandHandler`](AkkaExchange/ICommandHandler.cs) methods are a better example of what I mean.
 
-Also frankly a lot of the actor / messaging / streams stuff is difficult to reason about for a noob like me. Starting with tests allow you to ensure that you understand the most basic concepts before building it up bit by bit to end up with what you want. See the `AkkaStreamsTests` class for an example of what I mean.
+Also frankly a lot of the actor / messaging / streams stuff is difficult to reason about for a noob like me. Starting with tests allow you to ensure that you understand the most basic concepts before building it up bit by bit to end up with what you want. See the [`AkkaStreamsTests`](AkkaExchange.Tests/Akka/AkkaStreamsTests.cs) class for an example of what I mean.
 
 # Conclussion
 Although I'm new to all this stuff, I am starting to recognise the advantages to using this approach when the complexity of the problem you are trying to solve justifies the complexity of the means. Namely:
@@ -171,4 +171,4 @@ Although I'm new to all this stuff, I am starting to recognise the advantages to
 - I'm not going to use this for every CRUD app I ever build. There are a lot of concepts to learn and plumbing to grind through. But this approach would be my go-to if I was ever tasked with building something complex or important enough that a large amount of money or lives depended it. I'd recommend that you don't employ me to do this anytime soon.
 
 That's all folks!
-@jazzyskeltor
+[@jazzyskeltor](https://twitter.com/jazzyskeltor)
