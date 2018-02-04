@@ -5,8 +5,5 @@ WORKDIR /app
  
 RUN ["dotnet", "restore"]
 RUN ["dotnet", "build"]
- 
-
-ENV ASPNETCORE_URLS http://*:$PORT
- 
-CMD dotnet run
+  
+CMD dotnet run --server.urls=http://0.0.0.0:$PORT
