@@ -37,7 +37,7 @@ namespace AkkaExchange.Tests.Akka
             }
         }
 
-        // [Fact]
+        // [Fact] Wairing for a Stack Overflow response.
         public void AkkaStreams_ActorSourcePublisherSink_Works()
         {
             using (var materializer = Sys.Materializer())

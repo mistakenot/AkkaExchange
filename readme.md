@@ -1,11 +1,10 @@
 # AkkaExchange
 ## Event sourced commodity exchange 
-The goal of this project is to better get to grips with
+This is a learning project and as such certainly falls fowl of many good software principles. The primary aims are to learn about:
 - Event Sourcing
 - CQRS
 - Akka.NET Persistence & Streaming
-
-This is a learning project and as such certainly falls fowl of many good software principles. The primary aims are the learning objectives listed above.
+Everything else is secondary until the I can find the time to do it properly.
 
 # Domain Concepts
 The core domain concepts are:
@@ -151,4 +150,25 @@ If we were using F# we could write the Event types in such a way that the compil
 
 Anyway, as much as a F# fanboy that I may be, you could carry on fine with your domain code in C#. You would just need to get used to this strange new style and be more careful what adding new Commands and Events to your domain. I think that in a future implementation I would still use C# for all of the Akka plumbing code as the F# APIs are second class citizens and not as mature.
 
-## TDD
+## Test Driven Development
+One regret of the project was that I didn't use TDD more effectively. Often when I ran into a problem I didn't understand (e.g. creating an Akka Stream from an `IActorRef` source), I ended up writing a bunch of tests anyway to help me narrow down the source of the issue.
+
+The functional, state-machine nature of the `ICommandHandler`s and `IState.Update` functions in particular lend themselves very well to simple unit testing as you don't have to worry much about how you get into your initial "Arrange" state. This is one of the big advantages of immutable programming. 
+
+When writing code in a mutable OO form, your state is hidden and encapsulated inside a class. The class then exposes a domain specific API, in the form of Methods, that control how the internal state can be modified.
+
+The difficulty with this approach is that it can make it difficult to write isolated unit tests. In order to get your class from its default state to state Z, you often have to execute Methods X and Y beforehand. This introduces temporal dependencies into your code that makes your unit tests more coupled and harder to reason about. When you break method X, don't be surprised if the tests that check methods Y and Z also break.
+
+Seperating your state from your functionality makes this a lot easier without affecting the strong consistency characteristics that you get from traditional encapsulation. Note: the `IState` classes aren't good examples of this as the encapsulate both state and functionality. The `ICommandHandler` methods are a better example of what I mean.
+
+Also frankly a lot of the actor / messaging / streams stuff is difficult to reason about for a noob like me. Starting with tests allow you to ensure that you understand the most basic concepts before building it up bit by bit to end up with what you want. See the `AkkaStreamsTests` class for an example of what I mean.
+
+# Conclussion
+Although I'm new to all this stuff, I am starting to recognise the advantages to using this approach when the complexity of the problem you are trying to solve justifies the complexity of the means. Namely:
+- Event Sourcing is "lossless". You persist the events that create your state rather than the state itself. This makes it easy to see a complete audit trail of everything that has happened in your system. It's no surprise that most critical systems like databases and financial ledgers use this approach. To paraphrase Greg Young:
+> Do you think that your bank balance is a value or a calculation?
+- Messaging and CQRS are resiliant by default. You write code in such a way that your components don't wait for responses from their collaborators. This is known as "Tell don't ask". It forces the programmer to think explicitly about what happens when components fail to communicate with each other. It makes it less likely that a poorly implemented method will bubble a `NullReferenceException` all the way up the stack and blow the process up. The trade off is that it is sometimes difficult to tell exactly what is going on in the system. The only way to offset this is to implement good logging and great testing. It forces you to be a better programmer.
+- I'm not going to use this for every CRUD app I ever build. There are a lot of concepts to learn and plumbing to grind through. But this approach would be my go-to if I was ever tasked with building something complex or important enough that a large amount of money or lives depended it. I'd recommend that you don't employ me to do this anytime soon.
+
+That's all folks!
+@jazzyskeltor
