@@ -45,13 +45,13 @@ Furthermore, there is a `AkkaExchange.Web` project, which is intended to be a ba
 # Todo
 As far as the core objective of this project goes, it is more or less complete. The main thing left to do is to get feedback from subject matter experts to review how well I've implemented the core concepts of Event Sourcing and CQRS.
 That aside, there are a few nice-to-dos that I would like to find time to tie up. Many of these are tied to the "Lessons Learnt" section.
-[ ] Figure out what a `ICommandHandler` should really look like. Is it appropriate to return errors here? Should you provide the new State alongside the Event?
-[ ] Better improve the consistency charactistics of the system. There are currently many oppotunities to screw your state up.
-[ ] Develop client to be a bit more mature and fully featured, showing charts for price, volume, order history etc.
-[ ] Rewrite core domain code in pure F#. (See below.)
-[ ] Connect it to a database for persistent sessions. Maybe also add auth for web clients.
-[ ] Tidy up stream implementations; get rid of hacky internal Observable/Subject code and use the Akka.NET native `ISubscriber` and `IPublisher` interfaces. 
-[ ] Better error handling for failed order execution. In fact, better error handling everywhere.
+- [ ] Figure out what a `ICommandHandler` should really look like. Is it appropriate to return errors here? Should you provide the new State alongside the Event?
+- [ ] Better improve the consistency charactistics of the system. There are currently many oppotunities to screw your state up.
+- [ ] Develop client to be a bit more mature and fully featured, showing charts for price, volume, order history etc.
+- [ ] Rewrite core domain code in pure F#. (See below.)
+- [ ] Connect it to a database for persistent sessions. Maybe also add auth for web clients.
+- [ ] Tidy up stream implementations; get rid of hacky internal Observable/Subject code and use the Akka.NET native `ISubscriber` and `IPublisher` interfaces. 
+- [ ] Better error handling for failed order execution. In fact, better error handling everywhere.
 
 # Lessons Learnt
 ## Functional Programming
