@@ -10,13 +10,13 @@ Everything else is secondary until the I can find the time to do it properly.
 The core domain concepts are:
 
 ## Clients
-A Client can:
+A [Client](AkkaExchange/Client) can:
 - Connect and Disconnect from the the exchange.
 - Place Bid (buy) or Ask (sell) orders with parameters for Price and Quantity.
 - Subscribe to State, Error and Event streams.
 
 ## Order book
-The OrderBook is a singleton responsible for:
+The [OrderBook](AkkaExchange/Orders) is a singleton responsible for:
 - Receiving NewOrder, AmendOrder and RemoveOrder commands from clients.
 - Periodically matching pairs of orders.
 - Forwarding matched orders to the Execution Engine.
@@ -24,16 +24,16 @@ The OrderBook is a singleton responsible for:
 Matching is done by a simple Price/Time priority partial fill algorithm.
 
 ## Order Executor
-The OrderExecutorManager (singleton) and OrderExecutors are responsible for:
+The [OrderExecutorManager](AkkaExchange/Execution) (singleton) and OrderExecutors are responsible for:
 - Receiving matched Orders from the Order Book.
 - Executing matched Orders.
 - Forwarding executed Orders back to the OrderBook.
 
 # Abstractions
 The core abstractions are:
-- `ICommand` which represents a client's request to change part of the system state.
-- `ICommandHandler` which is a function of form `(State, Command) -> HandlerResult`. This validates a command against the current state of an entity and either returns `Success: Event` or `Error: List of Strings`.
-- `IState` which is the result of folding over an event stream to get the current state of an entity.
+- [`ICommand`](AkkaExchange/ICommand.cs) which represents a client's request to change part of the system state.
+- [`ICommandHandler`](AkkaExchange/ICommandHandler.cs) which is a function of form `(State, Command) -> HandlerResult`. This validates a command against the current state of an entity and either returns `Success: Event` or `Error: List of Strings`.
+- [`IState`](AkkaExchange/IState.cs) which is the result of folding over an event stream to get the current state of an entity.
 - `IState.Update` which is a function of form `(Event) -> State`. This updates the state after a successful event.
 - `IEvent` which represents the result of a successful `ICommand` that has been persisted into the event log.
 - Queries, represented as `IObservable<T>` instances. This is how a subscriber can receive state updates from the system.
