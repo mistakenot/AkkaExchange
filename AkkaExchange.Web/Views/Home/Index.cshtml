@@ -31,6 +31,10 @@
                 <p>Balance: <strong data-bind="text: balance"></strong></p>
                 <p>Asset Amount: <strong data-bind="text: amount"></strong></p>
                 <p>Number of Clients: <strong data-bind="text: numberOfClients"></strong></p>
+                <p>Order command history:</p>
+                <ul data-bind="foreach: history">
+                    <li data-bind="text: type"></li>
+                </ul>
             </div>
         </div>
     </div>
@@ -44,6 +48,7 @@
         self.connectionId = ko.computed(() => self.clientState().clientId)
         self.balance = ko.computed(() => self.clientState().balance)
         self.amount = ko.computed(() => self.clientState().amount)
+        self.history = ko.computed(() => self.clientState().orderCommandHistory)
         self.numberOfClients = ko.observable(0);
     }
 
