@@ -5,6 +5,7 @@ using Akka.Actor;
 using Akka.Streams;
 using Akka.Streams.Dsl;
 using Akka.TestKit.Xunit2;
+using Akka.Streams.TestKit;
 using AkkaExchange.Shared.Events;
 using AkkaExchange.Shared.Queries;
 using AkkaExchange.Utils;
@@ -37,19 +38,26 @@ namespace AkkaExchange.Tests.Akka
             }
         }
 
-        // [Fact] Wairing for a Stack Overflow response.
-        public void AkkaStreams_ActorSourcePublisherSink_Works()
+        [Fact] // Got a Stack Overflow response. See test below for better way of doing this.
+        public async Task AkkaStreams_ActorSourcePublisherSink_Works()
         {
             using (var materializer = Sys.Materializer())
             {
                 var probe = CreateTestProbe();
                 var source = Source.ActorRef<HandlerErrorEvent>(10, OverflowStrategy.DropNew);
                 var subscriber = new Mock<ISubscriber<HandlerErrorEvent>>();
+                
+                // See https://stackoverflow.com/questions/48605870/why-isnt-my-akka-net-stream-subscriber-receiving-messages
+                subscriber
+                    .Setup(s => s.OnSubscribe(It.IsAny<ISubscription>()))
+                    .Callback((ISubscription sub) => sub.Request(1)); // Subscriptions != Observers. Requires back pressure.
+
                 var sink = Sink.FromSubscriber<HandlerErrorEvent>(subscriber.Object);
                 var graph = source.ToMaterialized(sink, Keep.Both);
                 var (actor, publisher) = graph.Run(materializer);
                 
-                // publisher.Subscribe(subscriber.Object);
+                await Task.Delay(10);
+                
                 subscriber.Verify(s => s.OnSubscribe(It.IsAny<ISubscription>()));
 
                 var evnt = new HandlerErrorEvent("", HandlerResult.NotHandled);
@@ -67,6 +75,27 @@ namespace AkkaExchange.Tests.Akka
                         return false;
                     }
                 });
+            }
+        }
+
+        [Fact]
+        public void AkkaStreams_ActorSourcePublisherSink_UsingStreamsExtensions_Works()
+        {
+            using (var materializer = Sys.Materializer())
+            {
+                var probe = this.CreateManualSubscriberProbe<HandlerErrorEvent>();
+                var source = Source.ActorRef<HandlerErrorEvent>(10, OverflowStrategy.DropNew);
+                var sink = Sink.FromSubscriber<HandlerErrorEvent>(probe);
+                var graph = source.ToMaterialized(sink, Keep.Both);
+                var (actor, publisher) = graph.Run(materializer);
+
+                var subscription = probe.ExpectSubscription();
+                subscription.Request(1);
+
+                var evnt = new HandlerErrorEvent("", HandlerResult.NotHandled);
+                actor.Tell(evnt, ActorRefs.Nobody);
+
+                probe.ExpectNext(evnt);
             }
         }
 
