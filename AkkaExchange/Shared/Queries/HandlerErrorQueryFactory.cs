@@ -20,39 +20,40 @@ namespace AkkaExchange.Shared.Queries
             _materializer = materializer;
         }
 
-        public HandlerErrorQuery Create()
+        public (IActorRef, IObservable<HandlerErrorEvent>) Create()
         {
-            var source = Source.ActorRef<HandlerErrorEvent>(10, OverflowStrategy.DropNew);
             var subject = new Subject<HandlerErrorEvent>();
-            var sink = Sink.ForEach<HandlerErrorEvent>(subject.OnNext);
-            var graph = source.ToMaterialized(sink, Keep.Both);
-            var (actor, task) = graph.Run(_materializer);
+            var source = Source.ActorRef<HandlerErrorEvent>(0, OverflowStrategy.DropNew);
+            var sink = Sink.FromSubscriber(new Subscriber(subject));
+            var graph = source.ToMaterialized(sink, Keep.Left);
+            var actor = graph.Run(_materializer);
 
-            return new HandlerErrorQuery(actor, task, subject);
-        }
-    }
-
-    public class HandlerErrorQuery : IDisposable
-    {
-
-        public IActorRef Source { get; }
-        public IObservable<HandlerErrorEvent> Observable { get; }
-        private readonly Task _task;
-
-        public HandlerErrorQuery(
-            IActorRef source, 
-            Task task, 
-            IObservable<HandlerErrorEvent> observable)
-        {
-            Source = source;
-            Observable = observable;
-            
-            _task = task;
+            return (actor, subject);
         }
 
-        public void Dispose()
+        class Subscriber : ISubscriber<HandlerErrorEvent>
         {
-            _task.Dispose();
+            private readonly IObserver<HandlerErrorEvent> _observer;
+            private ISubscription _subscription;
+
+            public Subscriber(IObserver<HandlerErrorEvent> observer)
+            {
+                _observer = observer;
+            }
+
+            public void OnComplete() => _observer.OnCompleted();
+            public void OnError(Exception cause) => _observer.OnError(cause);
+            public void OnNext(HandlerErrorEvent element)
+            {
+                _observer.OnNext(element);
+                _subscription?.Request(1);
+            }
+
+            public void OnSubscribe(ISubscription subscription)
+            {
+                _subscription = subscription;
+                _subscription.Request(1);
+            }
         }
     }
 }

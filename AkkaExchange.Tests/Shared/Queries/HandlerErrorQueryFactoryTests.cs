@@ -19,17 +19,19 @@ namespace AkkaExchange.Tests.Shared.Queries
             using (var materializer = Sys.Materializer())
             {
                 var subject = new HandlerErrorQueryFactory(materializer);
-                var query = subject.Create();
+                var (source, observable) = subject.Create();
                 var msg = new HandlerErrorEvent("", HandlerResult.NotHandled);
                 var subscriber = new Mock<IObserver<HandlerErrorEvent>>();
-                var subscription = query.Observable.Subscribe(subscriber.Object);
-                
-                query.Source.Tell(msg, ActorRefs.Nobody);
+                var subscription = observable.Subscribe(subscriber.Object);
                 
                 // Graph is run async, so we need to give it a chance
                 //  to warm up.
-                await Task.Delay(100);
+                source.Tell(msg, ActorRefs.Nobody);
+                await Task.Delay(10);
+                subscriber.Verify(s => s.OnNext(It.IsAny<HandlerErrorEvent>()));
 
+                source.Tell(msg, ActorRefs.Nobody);
+                await Task.Delay(10);
                 subscriber.Verify(s => s.OnNext(It.IsAny<HandlerErrorEvent>()));
             }
         }
