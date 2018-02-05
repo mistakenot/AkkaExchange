@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.TestKit.Xunit2;
 using AkkaExchange.Client;
@@ -14,7 +15,7 @@ namespace AkkaExchange.Tests.Client
     public class ClientManagerActorTests : TestKit
     {
         [Fact]
-        public void ClientManagerActor_ReceivesEndConnectionEvent_ShutsdownChild_Ok()
+        public async Task ClientManagerActor_ReceivesEndConnectionEvent_ShutsdownChild_Ok()
         {
             var clientState = ClientFixture.ConnectedState;
 
@@ -34,6 +35,9 @@ namespace AkkaExchange.Tests.Client
                 clientState);
 
             var subjectActor = Sys.ActorOf(props);
+
+            await Task.Delay(10);
+            
             var childActor = ActorOfAsTestActorRef<ClientActor>(
                 childProps,
                 subjectActor, 
