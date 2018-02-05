@@ -14,7 +14,7 @@ namespace AkkaExchange.Tests.Client
     public class ClientActorTests : TestKit
     {
         [Fact]
-        public void ClientActor_ReceivesEndConnectionCommand_SendEndConnectionEventToManager()
+        public void ClientActor_ReceivesEndConnectionCommand_SendEndConnectionCommandToManager()
         {
             var initialState = ClientFixture.ConnectedState;
 
