@@ -25,7 +25,7 @@ namespace AkkaExchange.Client
                 null, 
                 ImmutableList<ICommand>.Empty, 
                 100m,
-                0m)
+                100m)
         {
             
         }

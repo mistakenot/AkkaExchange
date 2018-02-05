@@ -37,6 +37,22 @@ namespace AkkaExchange.Tests.Client
         }
 
         [Fact]
+        public void ClientHandler_ReceivesExecuteOrderCommand_NotEnoughAsset()
+        {
+            var command = new ExecuteOrderCommand(
+                Guid.Empty,
+                new NewOrderCommand(UnplacedAskOrder.WithAmount(1000)));
+
+            var actual = _subject.Handle(
+                ConnectedState,
+                command);
+
+            Assert.False(actual.Success);
+            Assert.Single(actual.Errors);
+            Assert.Equal("Asset amount too low.", actual.Errors.Single());
+        }
+
+        [Fact]
         public void ClientHandler_ReceivesEndConnectionCommand_Ok()
         {
             var actual = _subject.Handle(

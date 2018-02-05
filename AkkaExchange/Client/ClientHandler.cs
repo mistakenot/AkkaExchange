@@ -62,12 +62,20 @@ namespace AkkaExchange.Client
                         $"Client is not connected.");
                 }
 
-                if (executeOrderCommand.OrderCommand is NewOrderCommand newOrderCommand &&
-                    newOrderCommand.Order.Side == OrderSide.Bid &&
-                    newOrderCommand.Order.TotalPrice() > state.Balance)
+                if (executeOrderCommand.OrderCommand is NewOrderCommand bidOrderCommand &&
+                    bidOrderCommand.Order.Side == OrderSide.Bid &&
+                    bidOrderCommand.Order.TotalPrice() > state.Balance)
                 {
                     return new HandlerResult(
                         $"Balance too low.");
+                }
+
+                if (executeOrderCommand.OrderCommand is NewOrderCommand askOrderCommand &&
+                    askOrderCommand.Order.Side == OrderSide.Ask &&
+                    askOrderCommand.Order.Amount > state.Amount)
+                {
+                    return new HandlerResult(
+                        $"Asset amount too low.");
                 }
                 
                 return new HandlerResult(

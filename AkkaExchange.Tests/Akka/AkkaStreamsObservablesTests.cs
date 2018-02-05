@@ -24,7 +24,7 @@ namespace AkkaExchange.Tests.Akka
             _publisher = Source
                 .From(_values)
                 .ToMaterialized(
-                    Sink.Publisher<int>(),
+                    Sink.FanoutPublisher<int>(),
                     Keep.Right)
                 .Run(
                     Sys.Materializer());
@@ -86,6 +86,28 @@ namespace AkkaExchange.Tests.Akka
             observer.Dispose();
 
             subscriptionMock.Verify(s => s.Cancel());
+        }
+
+        [Fact]
+        public void AkkaStreamsObservable_MultipleSubscribers_Ok()
+        {
+            var probeOne = this.CreateManualSubscriberProbe<int>();
+            var probeTwo = this.CreateManualSubscriberProbe<int>();
+
+            _publisher.Subscribe(probeOne);
+            _publisher.Subscribe(probeTwo);
+
+            var subscriptionOne = probeOne.ExpectSubscription();
+            var subscriptionTwo = probeTwo.ExpectSubscription();
+            
+            subscriptionOne.Request(3);
+            subscriptionTwo.Request(3);
+
+            probeOne.ExpectNextN(_values);
+            probeOne.ExpectComplete();
+
+            probeTwo.ExpectNextN(_values);
+            probeTwo.ExpectComplete();
         }
     }
 }

@@ -12,7 +12,7 @@ namespace AkkaExchange.Shared.Extensions
             IMaterializer materializer)
         {
             var publisher = source.ToMaterialized(
-                    Sink.Publisher<T>(),
+                    Sink.FanoutPublisher<T>(),
                     Keep.Right)
                 .Run(materializer);
             
@@ -24,7 +24,7 @@ namespace AkkaExchange.Shared.Extensions
             IMaterializer materializer)
         {
             var (s, publisher) = source.ToMaterialized(
-                    Sink.Publisher<TOut>(),
+                    Sink.FanoutPublisher<TOut>(),
                     Keep.Both)
                 .Run(materializer);
             

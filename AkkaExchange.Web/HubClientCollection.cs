@@ -20,9 +20,9 @@ namespace AkkaExchange.Web
             return Clients.GetOrAdd(connectionId, id => _akkaExchange.NewConnection());
         }
 
-        public async Task DisposeClient(string clientId)
+        public async Task DisposeClient(string connectionId)
         {
-            if (Clients.TryRemove(clientId, out var valueFactory))
+            if (Clients.TryRemove(connectionId, out var valueFactory))
             {
                 var value = await valueFactory;
                 value.Dispose();

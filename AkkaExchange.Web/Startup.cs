@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace AkkaExchange.Web
 {
@@ -25,7 +26,7 @@ namespace AkkaExchange.Web
                 var configString = File.ReadAllText("config.txt");
                 var config = ConfigurationFactory.ParseString(configString);
 
-                return new AkkaExchange(container, config);
+                return new AkkaExchange(container, config, sp.GetService(typeof(ILogger<AkkaExchange>)) as ILogger<AkkaExchange>);
             });
 
             services.AddTransient<HubSubscriptionCollection>();

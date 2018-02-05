@@ -32,6 +32,7 @@ namespace AkkaExchange.Execution.Actors
                     var props = Props.Create<OrderExecutorActor>(
                         _orderExecutor,
                         _handler,
+                        _globalActorRefs,
                         Self,
                         new OrderExecutorState(beginOrderExecutionCommand.Order.OrderId));
 

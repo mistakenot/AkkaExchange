@@ -21,5 +21,11 @@ namespace AkkaExchange.Tests.Client
             10m,
             1m,
             OrderSide.Bid);
+
+        public static readonly Order UnplacedAskOrder = new Order(
+            Guid.Empty,
+            10m,
+            1m,
+            OrderSide.Ask);
     }
 }

@@ -6,6 +6,7 @@ using Akka.Configuration;
 using AkkaExchange.Orders;
 using AkkaExchange.Utils;
 using Autofac;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace AkkaExchange
@@ -20,8 +21,9 @@ namespace AkkaExchange
 
             var configString = File.ReadAllText("config.txt");
             var config = ConfigurationFactory.ParseString(configString);
+            var logger = new LoggerFactory().CreateLogger<AkkaExchange>();
 
-            using (var exchange = new AkkaExchange(builder, config))
+            using (var exchange = new AkkaExchange(builder, config, logger))
             {
                 var client = exchange.NewConnection().Result;
                 var clientSubscription = client.Events.Subscribe(e =>

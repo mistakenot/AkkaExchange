@@ -39,7 +39,6 @@ namespace AkkaExchange.Shared.Actors
                 }
                 else
                 {
-                    // TODO send errors to client
                     _globalActorRefs.ErrorEventSubscriber.Tell(
                         new HandlerErrorEvent(
                             PersistenceId,

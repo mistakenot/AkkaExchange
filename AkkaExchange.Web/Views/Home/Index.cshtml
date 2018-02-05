@@ -30,6 +30,7 @@
                 <p>Connected At: <strong data-bind="text: connectedAt"></strong></p>
                 <p>Balance: <strong data-bind="text: balance"></strong></p>
                 <p>Asset Amount: <strong data-bind="text: amount"></strong></p>
+                <p>Number of Clients: <strong data-bind="text: numberOfClients"></strong></p>
             </div>
         </div>
     </div>
@@ -43,6 +44,7 @@
         self.connectionId = ko.computed(() => self.clientState().clientId)
         self.balance = ko.computed(() => self.clientState().balance)
         self.amount = ko.computed(() => self.clientState().amount)
+        self.numberOfClients = ko.observable(0);
     }
 
     var vm = new VM();
@@ -59,15 +61,27 @@
                         case "ClientState":
                             vm.clientState(data);
                             break;
+                        case "StartConnectionEvent":
+                            term.echo("Client started.");
+                            break;
+                        case "EndConnectionEvent":
+                            term.echo("Client stopped.");
+                            break;
+                        case "NumberOfConnectedClients":
+                            vm.numberOfClients(data.connectedClients);
+                            break;
+                        case "HandlerResult":
+                            term.echo("Error: " + data.errors[0]);
+                            break;
                         default:
                             break;
                     }
+                    
                     console.log(data);
-                    term.echo(data.type);
                 });
 
             connection.start()
-                .then(() => term.echo("Connected successfully."));
+                .then(() => term.echo("Connected to server."));
     
             var funcs = {
                 help: function() {
@@ -111,7 +125,7 @@
         var outputTerminal = $("#output_terminal").terminal(
             {},
             {
-                greetings: "Connecting to event log...",
+                greetings: "Establishing connection.",
                 name: 'js_demo_two',
                 height: 200,
                 keypress: () => {

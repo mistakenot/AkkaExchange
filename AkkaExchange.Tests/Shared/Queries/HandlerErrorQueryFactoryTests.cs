@@ -28,7 +28,9 @@ namespace AkkaExchange.Tests.Shared.Queries
                 //  to warm up before asserting anything.
                 source.Tell(msg, ActorRefs.Nobody);
                 source.Tell(msg, ActorRefs.Nobody);
-                await Task.Delay(10);
+                
+                await Task.Delay(100);
+                
                 subscriber.Verify(s => s.OnNext(It.IsAny<HandlerErrorEvent>()), Times.Exactly(2));
             }
         }

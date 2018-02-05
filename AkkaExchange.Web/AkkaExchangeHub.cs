@@ -4,6 +4,7 @@ using AkkaExchange.Orders;
 using AkkaExchange.Client.Extensions;
 using Microsoft.AspNetCore.SignalR;
 using System.Reactive.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace AkkaExchange.Web
 {
@@ -12,21 +13,26 @@ namespace AkkaExchange.Web
         private readonly HubSubscriptionCollection _subscriptions;
         private readonly HubClientCollection _clients;
         private readonly AkkaExchange _akkaExchange;
+        private readonly ILogger<AkkaExchangeHub> _logger;
 
         public AkkaExchangeHub( 
             HubSubscriptionCollection subscriptions,
             HubClientCollection clients,
-            AkkaExchange akkaExchange)
+            AkkaExchange akkaExchange,
+            ILogger<AkkaExchangeHub> logger)
         {
             _subscriptions = subscriptions;
             _clients = clients;
             _akkaExchange = akkaExchange;
+            _logger = logger;
         }
 
         public override async Task OnConnectedAsync()
         {
+            _logger.LogInformation($"OnConnect ConnectionId: {Context.ConnectionId}");
+
             var client = await _clients.GetClient(Context.ConnectionId);
-            var subscription = client.Events
+            var observable = client.Events
                 .Merge(
                     client.State.Cast<object>())
                 .Merge(
@@ -36,13 +42,15 @@ namespace AkkaExchange.Web
                 .Merge(
                     _akkaExchange.Queries.ClientManagerState.NumberOfConnectedClientsQuery().Cast<object>());
             
-            _subscriptions.TryAdd(Context.ConnectionId, subscription);
+            _subscriptions.TryAdd(Context.ConnectionId, observable);
             
             await base.OnConnectedAsync();
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
+            _logger.LogInformation($"OnDisconnect ConnectionId: {Context.ConnectionId}");
+            
             await _clients.DisposeClient(Context.ConnectionId);
             _subscriptions.TryDispose(Context.ConnectionId);
 

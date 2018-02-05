@@ -39,14 +39,6 @@ namespace AkkaExchange.Utils
             _subscription.Request(1);
         }
 
-        public void Dispose()
-        {
-            if (_subscription == null)
-            {
-                throw new InvalidOperationException("Dispose can't be called before OnSubscribe.");
-            }
-            
-            _subscription.Cancel();
-        }
+        public void Dispose() => _subscription?.Cancel();
     }
 }

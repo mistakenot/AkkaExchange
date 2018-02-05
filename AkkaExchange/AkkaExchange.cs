@@ -20,6 +20,7 @@ using AkkaExchange.Shared.Events;
 using AkkaExchange.Shared.Queries;
 using AkkaExchange.Utils;
 using Autofac;
+using Microsoft.Extensions.Logging;
 
 namespace AkkaExchange
 {
@@ -28,6 +29,9 @@ namespace AkkaExchange
         public IAkkaExchangeQueries Queries { get; }
 
         private readonly ActorSystem _system;
+
+        public ILogger<AkkaExchange> _logger { get; }
+
         private readonly IActorRef _clientManager;
         private readonly IActorRef _orderBook;
         private Task _source;
@@ -35,10 +39,14 @@ namespace AkkaExchange
         private readonly StateQueryFactory<ClientState> _clientStateQueryFactory;
         private readonly IActorRef _orderExecutorManager;
 
-        public AkkaExchange(ContainerBuilder container, Config config)
+        public AkkaExchange(
+            ContainerBuilder container, 
+            Config config,
+            ILogger<AkkaExchange> logger)
         {
             _system = ActorSystem.Create("akka-exchange-system", config);
-
+            _logger = logger;
+            
             var globalActorRefs = new GlobalActorRefs();
 
             container.RegisterInstance<IGlobalActorRefs>(globalActorRefs);
@@ -111,6 +119,8 @@ namespace AkkaExchange
                 .Where(e => e.Name == persistenceId)
                 .Select(e => e.Result);
 
+            _logger.LogInformation($"Created new client {persistenceId}");
+            
             return new AkkaExchangeClient(
                 command.ClientId,
                 inbox,
