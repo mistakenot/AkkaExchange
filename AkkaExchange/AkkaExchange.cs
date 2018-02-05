@@ -25,7 +25,7 @@ namespace AkkaExchange
 {
     public class AkkaExchange : IDisposable
     {
-        public AkkaExchangeQueries Queries { get; }
+        public IAkkaExchangeQueries Queries { get; }
 
         private readonly ActorSystem _system;
         private readonly IActorRef _clientManager;
@@ -46,11 +46,12 @@ namespace AkkaExchange
             var materializer = ActorMaterializer.Create(_system);
             var readJournal = PersistenceQuery.Get(_system).ReadJournalFor<SqlReadJournal>("akka.persistence.query.journal.sql");
             
-            Queries = AkkaExchangeQueries.Create(
+            var queries = AkkaExchangeQueries.Create(
                 materializer, 
                 readJournal);
 
-            globalActorRefs.ErrorEventSubscriber = Queries.HandlerErrorEventsSource;
+            globalActorRefs.ErrorEventSubscriber = queries.HandlerErrorEventsSource;
+            Queries = queries;
 
             // Used in client actor
             container.RegisterInstance(Queries.OrderBookState);

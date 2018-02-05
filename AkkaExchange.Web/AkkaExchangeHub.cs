@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AkkaExchange.Orders;
+using AkkaExchange.Client.Extensions;
 using Microsoft.AspNetCore.SignalR;
 using System.Reactive.Linq;
 
@@ -26,9 +27,14 @@ namespace AkkaExchange.Web
         {
             var client = await _clients.GetClient(Context.ConnectionId);
             var subscription = client.Events
-                .Merge(client.State.Cast<object>())
-                .Merge(client.Errors.Cast<object>())
-                .Merge(_akkaExchange.Queries.PlacedOrderVolumePerTenSeconds.Cast<object>());
+                .Merge(
+                    client.State.Cast<object>())
+                .Merge(
+                    client.Errors.Cast<object>())
+                .Merge(
+                    _akkaExchange.Queries.PlacedOrderVolumePerTenSeconds.Cast<object>())
+                .Merge(
+                    _akkaExchange.Queries.ClientManagerState.NumberOfConnectedClientsQuery().Cast<object>());
             
             _subscriptions.TryAdd(Context.ConnectionId, subscription);
             

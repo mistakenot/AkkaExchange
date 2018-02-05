@@ -14,12 +14,20 @@ using AkkaExchange.Utils;
 
 namespace AkkaExchange
 {
-    public class AkkaExchangeQueries
+    public interface IAkkaExchangeQueries
     {
-        public IObservable<ClientManagerState> ClientManagerState { get; }
+        IObservable<OrderBookState> OrderBookState { get; }
+        IObservable<PlacedOrderVolume> PlacedOrderVolumePerTenSeconds { get; }
+        IObservable<HandlerErrorEvent> HandlerErrorEvents { get; }
+        IObservable<ClientManagerState> ClientManagerState { get; }
+    }
+    
+    public class AkkaExchangeQueries : IAkkaExchangeQueries
+    {
         public IObservable<OrderBookState> OrderBookState { get; }
         public IObservable<PlacedOrderVolume> PlacedOrderVolumePerTenSeconds { get; }
         public IObservable<HandlerErrorEvent> HandlerErrorEvents { get; }
+        public IObservable<ClientManagerState> ClientManagerState { get; }
         public IActorRef HandlerErrorEventsSource { get; }
 
         public AkkaExchangeQueries(
