@@ -43,6 +43,9 @@ namespace AkkaExchange.Web
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
+            var client = await _clients.GetClient(Context.ConnectionId);
+            client.Dispose();
+            
             await _clients.DisposeClient(Context.ConnectionId);
             _subscriptions.TryDispose(Context.ConnectionId);
 

@@ -67,9 +67,7 @@ namespace AkkaExchange
 
         public void Dispose()
         {
-            var command = new ExecuteOrderCommand(
-                _clientId,
-                new EndConnectionCommand(_clientId));
+            var command = new EndConnectionCommand(_clientId);
 
             _clientActor.Tell(command);
             _inbox.Dispose();

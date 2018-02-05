@@ -163,6 +163,9 @@ Seperating your state from your functionality makes this a lot easier without af
 
 Also frankly a lot of the actor / messaging / streams stuff is difficult to reason about for a noob like me. Starting with tests allow you to ensure that you understand the most basic concepts before building it up bit by bit to end up with what you want. See the [`AkkaStreamsTests`](AkkaExchange.Tests/Akka/AkkaStreamsTests.cs) class for an example of what I mean.
 
+## Reactive Streams vs Rx Observables
+A mistake I made when implementing the query streams was assuming that Rx style Observables == Akka.Net Reactive Streams. This isn't the case as `IObservers` do not have any concept of "requesting" elements from the producer so that they can control the rate of flow. This resulted in me wondering why my observables weren't receiveing any messages from the `IProducer` instances in the Akka Streams library. A quick SO questions revealed this, and I built it into my stream observers.
+
 # Conclussion
 Although I'm new to all this stuff, I am starting to recognise the advantages to using this approach when the complexity of the problem you are trying to solve justifies the complexity of the means. Namely:
 - Event Sourcing is "lossless". You persist the events that create your state rather than the state itself. This makes it easy to see a complete audit trail of everything that has happened in your system. It's no surprise that most critical systems like databases and financial ledgers use this approach. To paraphrase Greg Young:

@@ -25,14 +25,11 @@ namespace AkkaExchange.Tests.Shared.Queries
                 var subscription = observable.Subscribe(subscriber.Object);
                 
                 // Graph is run async, so we need to give it a chance
-                //  to warm up.
+                //  to warm up before asserting anything.
+                source.Tell(msg, ActorRefs.Nobody);
                 source.Tell(msg, ActorRefs.Nobody);
                 await Task.Delay(10);
-                subscriber.Verify(s => s.OnNext(It.IsAny<HandlerErrorEvent>()));
-
-                source.Tell(msg, ActorRefs.Nobody);
-                await Task.Delay(10);
-                subscriber.Verify(s => s.OnNext(It.IsAny<HandlerErrorEvent>()));
+                subscriber.Verify(s => s.OnNext(It.IsAny<HandlerErrorEvent>()), Times.Exactly(2));
             }
         }
     }

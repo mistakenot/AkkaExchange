@@ -3,6 +3,7 @@ using AkkaExchange.Shared.Actors;
 using AkkaExchange.Client.Commands;
 using AkkaExchange.Client.Events;
 using AkkaExchange.Utils;
+using System;
 
 namespace AkkaExchange.Client.Actors
 {
@@ -44,17 +45,11 @@ namespace AkkaExchange.Client.Actors
 
             if (persistedEvent is EndConnectionEvent endConnectionEvent)
             {
-                StopClient(endConnectionEvent);
+                var child = Context.Child(endConnectionEvent.ClientName);
+                Context.Stop(child);
             }
 
             base.OnPersist(persistedEvent);
-        }
-
-        private void StopClient(EndConnectionEvent endConnectionEvent)
-        {
-            var child = Context.Child(endConnectionEvent.ClientName);
-            child.Tell(new EndConnectionCommand(endConnectionEvent.ClientId), Sender);
-            Context.Stop(child);
         }
 
         private IActorRef CreateClient(StartConnectionEvent startConnectionEvent)
@@ -68,21 +63,6 @@ namespace AkkaExchange.Client.Actors
                 Sender);
 
             return child;
-        }
-
-        protected override void OnRecover(object persistedEvent)
-        {
-            if (persistedEvent is StartConnectionEvent startConnectionEvent)
-            {
-                CreateClient(startConnectionEvent);
-            }
-
-            if (persistedEvent is EndConnectionEvent endConnectionEvent)
-            {
-                StopClient(endConnectionEvent);
-            }
-
-            base.OnRecover(persistedEvent);
         }
     }
 }

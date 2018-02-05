@@ -23,7 +23,7 @@ namespace AkkaExchange.Shared.Queries
         public (IActorRef, IObservable<HandlerErrorEvent>) Create()
         {
             var subject = new Subject<HandlerErrorEvent>();
-            var source = Source.ActorRef<HandlerErrorEvent>(0, OverflowStrategy.DropNew);
+            var source = Source.ActorRef<HandlerErrorEvent>(100, OverflowStrategy.DropHead);
             var sink = Sink.FromSubscriber(new Subscriber(subject));
             var graph = source.ToMaterialized(sink, Keep.Left);
             var actor = graph.Run(_materializer);

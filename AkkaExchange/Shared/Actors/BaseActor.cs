@@ -55,6 +55,16 @@ namespace AkkaExchange.Shared.Actors
             {
                 _state = _state.Update(evnt);
             }
+            
+            if (persistedEvent is RecoveryCompleted)
+            {
+                OnRecoverComplete();
+            }
+        }
+
+        protected virtual void OnRecoverComplete() 
+        {
+            
         }
 
         protected virtual void OnPersist(IEvent persistedEvent)

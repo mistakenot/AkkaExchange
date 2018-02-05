@@ -7,7 +7,7 @@ namespace AkkaExchange.Tests.Client
 {
     public abstract class ClientFixture
     {
-        protected ClientState ConnectedState = new ClientState(
+        public static readonly ClientState ConnectedState = new ClientState(
             Guid.Empty, 
             ClientStatus.Connected,
             DateTime.UtcNow.AddMinutes(-10),
@@ -16,7 +16,7 @@ namespace AkkaExchange.Tests.Client
             100m,
             100m);
 
-        protected Order UnplacedBidOrder = new Order(
+        public static readonly Order UnplacedBidOrder = new Order(
             Guid.Empty,
             10m,
             1m,

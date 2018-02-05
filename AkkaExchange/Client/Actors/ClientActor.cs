@@ -4,12 +4,14 @@ using AkkaExchange.Client.Events;
 using System;
 using AkkaExchange.Orders;
 using AkkaExchange.Utils;
+using AkkaExchange.Client.Commands;
 
 namespace AkkaExchange.Client.Actors
 {
     public class ClientActor : BaseActor<ClientState>
     {
         private readonly ICanTell _orderBookActor;
+        private readonly IActorRef _clientManagerActor;
         private readonly IObservable<OrderBookState> _orderBookState;
 
         public ClientActor(
@@ -19,6 +21,7 @@ namespace AkkaExchange.Client.Actors
             : base(handler, globalActorRefs, defaultState, defaultState.ClientId.ToString())
         {
             _orderBookActor = Context.ActorSelection("/user/order-book");
+            _clientManagerActor = globalActorRefs.ClientManager;
         }
 
         public override void AroundPreStart()
@@ -30,7 +33,14 @@ namespace AkkaExchange.Client.Actors
         {
             if (persistedEvent is ExecuteOrderEvent executeOrderCommand)
             {
-                _orderBookActor.Tell(executeOrderCommand.OrderCommand, Self);
+                _orderBookActor.Tell(
+                    executeOrderCommand.OrderCommand, Self);
+            }
+
+            if (persistedEvent is EndConnectionEvent endConnectionEvent)
+            {
+                _clientManagerActor.Tell(
+                    new EndConnectionCommand(endConnectionEvent.ClientId));
             }
             
             base.OnPersist(persistedEvent);
