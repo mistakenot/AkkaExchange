@@ -6,6 +6,7 @@ using Akka.Actor;
 using Akka.Streams;
 using Akka.Streams.Dsl;
 using AkkaExchange.Shared.Events;
+using AkkaExchange.Shared.Extensions;
 using AkkaExchange.Utils;
 using Reactive.Streams;
 
@@ -20,15 +21,11 @@ namespace AkkaExchange.Shared.Queries
             _materializer = materializer;
         }
 
-        public (IActorRef, IObservable<HandlerErrorEvent>) Create()
+        public (IObservable<HandlerErrorEvent>, IActorRef) Create()
         {
-            var subject = new Subject<HandlerErrorEvent>();
-            var source = Source.ActorRef<HandlerErrorEvent>(100, OverflowStrategy.DropHead);
-            var sink = Sink.FromSubscriber(new Subscriber(subject));
-            var graph = source.ToMaterialized(sink, Keep.Left);
-            var actor = graph.Run(_materializer);
-
-            return (actor, subject);
+            return Source
+                .ActorRef<HandlerErrorEvent>(100, OverflowStrategy.DropHead)
+                .RunAsObservable(_materializer);
         }
 
         class Subscriber : ISubscriber<HandlerErrorEvent>

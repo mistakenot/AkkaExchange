@@ -2,6 +2,7 @@
 using Akka.Persistence.Query;
 using Akka.Streams;
 using Akka.Streams.Dsl;
+using AkkaExchange.Shared.Extensions;
 using AkkaExchange.Utils;
 
 namespace AkkaExchange.Shared.Queries
@@ -33,7 +34,7 @@ namespace AkkaExchange.Shared.Queries
                 .Where(e => e is IEvent)
                 .Scan(_defaultState, (state, evnt) => state.Update(evnt as IEvent));
 
-            return new SourceObservable<T>(source, _materializer);
+            return source.RunAsObservable(_materializer);
         }
     }
 }

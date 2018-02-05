@@ -4,6 +4,7 @@ using Akka.Persistence.Query;
 using Akka.Streams;
 using Akka.Streams.Dsl;
 using AkkaExchange.Utils;
+using AkkaExchange.Shared.Extensions;
 
 namespace AkkaExchange.Shared.Queries
 {
@@ -28,7 +29,7 @@ namespace AkkaExchange.Shared.Queries
                     long.MaxValue)
                 .Select(env => env.Event);
 
-            return new SourceObservable<object>(eventsSource, _materializer);
+            return eventsSource.RunAsObservable(_materializer);
         }
     }
 }

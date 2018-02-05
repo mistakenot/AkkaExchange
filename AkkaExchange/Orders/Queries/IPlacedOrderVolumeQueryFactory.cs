@@ -3,6 +3,7 @@ using Akka.Persistence.Query;
 using Akka.Streams;
 using Akka.Streams.Dsl;
 using AkkaExchange.Orders.Events;
+using AkkaExchange.Shared.Extensions;
 using AkkaExchange.Utils;
 
 namespace AkkaExchange.Orders.Queries
@@ -36,7 +37,7 @@ namespace AkkaExchange.Orders.Queries
                 .GroupedWithin(100, timeChunkSize)
                 .Select(PlacedOrderVolume.FromEnumerable);
             
-            return new SourceObservable<PlacedOrderVolume>(eventsSource, _materializer);
+            return eventsSource.RunAsObservable(_materializer);
         }
     }
 }

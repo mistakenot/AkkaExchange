@@ -63,7 +63,7 @@ namespace AkkaExchange
                 materializer);
             
             var handlerErrorFactory = new HandlerErrorQueryFactory(materializer);
-            var (handlerErrorSource, handlerErrorObservable) = handlerErrorFactory.Create();
+            var (handlerErrorObservable, handlerErrorSource) = handlerErrorFactory.Create();
 
             return new AkkaExchangeQueries(
                 clientManagerQueryFactory.Create("client-manager"),

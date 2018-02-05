@@ -3,6 +3,7 @@ using Akka.Persistence.Query;
 using Akka.Streams;
 using Akka.Streams.Dsl;
 using AkkaExchange.Orders.Events;
+using AkkaExchange.Shared.Extensions;
 using AkkaExchange.Utils;
 
 namespace AkkaExchange.Orders.Queries
@@ -32,13 +33,13 @@ namespace AkkaExchange.Orders.Queries
         {
             var source = _eventsByPersistenceIdQuery.EventsByPersistenceId(
                 _orderBookPersistenceId,
-                0l,
+                0L,
                 long.MaxValue)
                 .Where(e => e.Event is IClientOrderEvent)
                 .Select(e => e.Event as IClientOrderEvent)
                 .Where(e => e.ClientId == clientId);
 
-            return new SourceObservable<IClientOrderEvent>(source, _materializer);
+            return source.RunAsObservable(_materializer);
         }
     }
 }

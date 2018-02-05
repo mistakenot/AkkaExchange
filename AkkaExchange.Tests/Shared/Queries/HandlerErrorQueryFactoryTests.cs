@@ -19,7 +19,7 @@ namespace AkkaExchange.Tests.Shared.Queries
             using (var materializer = Sys.Materializer())
             {
                 var subject = new HandlerErrorQueryFactory(materializer);
-                var (source, observable) = subject.Create();
+                var (observable, source) = subject.Create();
                 var msg = new HandlerErrorEvent("", HandlerResult.NotHandled);
                 var subscriber = new Mock<IObserver<HandlerErrorEvent>>();
                 var subscription = observable.Subscribe(subscriber.Object);
