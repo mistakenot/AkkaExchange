@@ -5,10 +5,9 @@ namespace AkkaExchange.Client.Commands
 {
     public class CompleteOrderCommand : Message, ICommand
     {
-        public Order Order { get; }
+        public PlacedOrder Order { get; }
         
-        public CompleteOrderCommand(
-            Order order)
+        public CompleteOrderCommand(PlacedOrder order)
         {
             Order = order;
         }

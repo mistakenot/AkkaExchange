@@ -14,6 +14,7 @@ namespace AkkaExchange.Client
         public decimal Balance { get; }
         public decimal Amount { get; }
         public IImmutableList<ICommand> OrderCommandHistory { get; }
+        public IImmutableList<PlacedOrder> OrderHistory { get; } 
 
         public static readonly ClientState Empty = new ClientState(Guid.Empty);
 
@@ -23,7 +24,8 @@ namespace AkkaExchange.Client
                 ClientStatus.Pending, 
                 null, 
                 null, 
-                ImmutableList<ICommand>.Empty, 
+                ImmutableList<ICommand>.Empty,
+                ImmutableList<PlacedOrder>.Empty,
                 100m,
                 100m)
         {
@@ -35,7 +37,8 @@ namespace AkkaExchange.Client
             ClientStatus status, 
             DateTime? startedAt, 
             DateTime? endedAt, 
-            IImmutableList<ICommand> orderCommandHistory, 
+            IImmutableList<ICommand> orderCommandHistory,
+            IImmutableList<PlacedOrder> orderHistory,
             decimal balance,
             decimal amount)
         {
@@ -44,6 +47,7 @@ namespace AkkaExchange.Client
             StartedAt = startedAt;
             EndedAt = endedAt;
             OrderCommandHistory = orderCommandHistory;
+            OrderHistory = orderHistory;
             Balance = balance;
             Amount = amount;
         }
@@ -59,6 +63,7 @@ namespace AkkaExchange.Client
                     startConnectionEvent.StartedAt,
                     null,
                     OrderCommandHistory,
+                    OrderHistory,
                     Balance,
                     Amount);
             }
@@ -72,6 +77,7 @@ namespace AkkaExchange.Client
                     StartedAt,
                     endConnectionEvent.EndedAt,
                     OrderCommandHistory,
+                    OrderHistory,
                     Balance,
                     Amount);
             }
@@ -84,6 +90,7 @@ namespace AkkaExchange.Client
                     StartedAt,
                     EndedAt,
                     OrderCommandHistory.Add(executeOrderEvent.OrderCommand),
+                    OrderHistory,
                     Balance,
                     Amount);
             }
@@ -91,18 +98,21 @@ namespace AkkaExchange.Client
             if (evnt is CompleteOrderEvent completeOrderEvent &&
                 Status == ClientStatus.Connected)
             {
+                var order = completeOrderEvent.Order;
+
                 return new ClientState(
                     ClientId,
                     Status,
                     StartedAt,
                     EndedAt,
-                    OrderCommandHistory,
-                    completeOrderEvent.Side == OrderSide.Bid ? 
-                        Balance - completeOrderEvent.TotalPrice() : 
-                        Balance + completeOrderEvent.TotalPrice(),
-                    completeOrderEvent.Side == OrderSide.Bid ? 
-                        Amount + completeOrderEvent.Amount :
-                        Amount - completeOrderEvent.Amount);
+                OrderCommandHistory,
+                    OrderHistory.Add(completeOrderEvent.Order),
+                    order.Side == OrderSide.Bid ? 
+                        Balance - order.TotalPrice() : 
+                        Balance + order.TotalPrice(),
+                    order.Side == OrderSide.Bid ? 
+                        Amount + order.Amount :
+                        Amount - order.Amount);
             }
             return this;
         }

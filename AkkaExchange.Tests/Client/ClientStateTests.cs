@@ -62,8 +62,13 @@ namespace AkkaExchange.Tests.Client
         public void ClientState_ReceivesCompleteOrderEvent_UpdatesBalanceOk()
         {
             ClientState_ReceivesStartConnectionEvent_Ok();
+            
+            var order = new PlacedOrder(
+                new Order(Guid.Empty, 10m, 1m, OrderSide.Bid),
+                DateTime.UtcNow.AddSeconds(-1),
+                Guid.Empty);
 
-            var evnt = new CompleteOrderEvent(OrderSide.Bid, 10m, 1m);
+            var evnt = new CompleteOrderEvent(order);
 
             _subject = _subject.Update(evnt);
 
@@ -75,11 +80,16 @@ namespace AkkaExchange.Tests.Client
         {
             ClientState_ReceivesStartConnectionEvent_Ok();
 
-            var evnt = new CompleteOrderEvent(OrderSide.Bid, 10m, 1m);
+            var order = new PlacedOrder(
+                new Order(Guid.Empty, 10m, 1m, OrderSide.Bid),
+                DateTime.UtcNow.AddSeconds(-1),
+                Guid.Empty);
+
+            var evnt = new CompleteOrderEvent(order);
 
             _subject = _subject.Update(evnt);
 
-            Assert.Equal(10, _subject.Amount);
+            Assert.Equal(110, _subject.Amount);
         }
 
         [Fact]
@@ -87,11 +97,33 @@ namespace AkkaExchange.Tests.Client
         {
             ClientState_ReceivesStartConnectionEvent_Ok();
 
-            var evnt = new CompleteOrderEvent(OrderSide.Ask, 10m, 1m);
+            var order = new PlacedOrder(
+                new Order(Guid.Empty, 10m, 1m, OrderSide.Ask),
+                DateTime.UtcNow.AddSeconds(-1),
+                Guid.Empty);
+
+            var evnt = new CompleteOrderEvent(order);
 
             _subject = _subject.Update(evnt);
 
-            Assert.Equal(-10, _subject.Amount);
+            Assert.Equal(90, _subject.Amount);
+        }
+
+        [Fact]
+        public void ClientState_ReceivesCompleteOrderEventBid_UpdatesOrderHistoryOk()
+        {
+            ClientState_ReceivesStartConnectionEvent_Ok();
+
+            var order = new PlacedOrder(
+                new Order(Guid.Empty, 10m, 1m, OrderSide.Ask),
+                DateTime.UtcNow.AddSeconds(-1),
+                Guid.Empty);
+
+            var evnt = new CompleteOrderEvent(order);
+
+            _subject = _subject.Update(evnt);
+
+            Assert.Single(_subject.OrderHistory);
         }
     }
 }

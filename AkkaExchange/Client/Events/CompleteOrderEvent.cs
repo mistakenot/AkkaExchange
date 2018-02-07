@@ -5,20 +5,11 @@ namespace AkkaExchange.Client.Events
 {
     public class CompleteOrderEvent : Message, IEvent
     {
-        public OrderSide Side { get; }
-        public decimal Amount { get; }
-        public decimal Price { get; }
+        public PlacedOrder Order { get; }
         
-        public CompleteOrderEvent(
-            OrderSide side,
-            decimal amount,
-            decimal price)
+        public CompleteOrderEvent(PlacedOrder order)
         {
-            Side = side;
-            Amount = amount;
-            Price = price;
+            Order = order;
         }
-
-        public decimal TotalPrice() => Amount * Price;
     }
 }

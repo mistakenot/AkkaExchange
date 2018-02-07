@@ -94,9 +94,7 @@ namespace AkkaExchange.Client
 
                 return new HandlerResult(
                     new CompleteOrderEvent(
-                        completeOrderCommand.Order.Side,
-                        completeOrderCommand.Order.Amount,
-                        completeOrderCommand.Order.Price));
+                        completeOrderCommand.Order));
             }
 
             return HandlerResult.NotHandled;

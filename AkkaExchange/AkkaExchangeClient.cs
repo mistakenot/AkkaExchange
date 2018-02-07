@@ -13,8 +13,8 @@ namespace AkkaExchange
         public IObservable<ClientState> State { get; }
         public IObservable<HandlerResult> Errors { get; }
         public IObservable<object> Events { get; }
-
-        private readonly Guid _clientId;
+        public Guid ClientId { get; }
+        
         private readonly Inbox _inbox;
         private readonly IActorRef _clientActor;
 
@@ -26,7 +26,7 @@ namespace AkkaExchange
             IObservable<ClientState> state,
             IObservable<HandlerResult> errors)
         {
-            _clientId = clientId;
+            ClientId = clientId;
             _inbox = inbox ?? throw new ArgumentNullException(nameof(inbox));
             _clientActor = clientActor ?? throw new ArgumentNullException(nameof(clientActor));
 
@@ -38,9 +38,9 @@ namespace AkkaExchange
         public void NewOrder(decimal price, decimal amount, OrderSide side)
         {
             var command = new ExecuteOrderCommand(
-                _clientId, 
+                ClientId, 
                 new NewOrderCommand(
-                    new Order(_clientId, amount, price, side)));
+                    new Order(ClientId, amount, price, side)));
 
             _clientActor.Tell(command, _inbox.Receiver);
         }
@@ -48,10 +48,10 @@ namespace AkkaExchange
         public void AmendOrder(Guid orderId, decimal price, decimal amount, OrderSide side)
         {
             var command = new ExecuteOrderCommand(
-                _clientId,
+                ClientId,
                 new AmendOrderCommand(
                     orderId,
-                    new Order(_clientId, amount, price, side)));
+                    new Order(ClientId, amount, price, side)));
 
             _clientActor.Tell(command, _inbox.Receiver);
         }
@@ -59,7 +59,7 @@ namespace AkkaExchange
         public void CancelOrder(Guid orderId)
         {
             var command = new ExecuteOrderCommand(
-                _clientId,
+                ClientId,
                 new RemoveOrderCommand(orderId));
 
             _clientActor.Tell(command, _inbox.Receiver);
@@ -67,7 +67,7 @@ namespace AkkaExchange
 
         public void Dispose()
         {
-            var command = new EndConnectionCommand(_clientId);
+            var command = new EndConnectionCommand(ClientId);
 
             _clientActor.Tell(command);
             _inbox.Dispose();

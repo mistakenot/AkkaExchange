@@ -31,9 +31,9 @@
                 <p>Balance: <strong data-bind="text: balance"></strong></p>
                 <p>Asset Amount: <strong data-bind="text: amount"></strong></p>
                 <p>Number of Clients: <strong data-bind="text: numberOfClients"></strong></p>
-                <p>Order command history:</p>
-                <ul data-bind="foreach: history">
-                    <li data-bind="text: type"></li>
+                <p>Open Orders:</p>
+                <ul data-bind="foreach: openOrders">
+                    <li>Id: <strong data-bind="text: orderId"></strong></li>
                 </ul>
             </div>
         </div>
@@ -50,12 +50,13 @@
         self.amount = ko.computed(() => self.clientState().amount)
         self.history = ko.computed(() => self.clientState().orderCommandHistory)
         self.numberOfClients = ko.observable(0);
+        self.openOrders = ko.observable([]);
     }
 
     var vm = new VM();
     ko.applyBindings(vm);
-
-    jQuery(function($, undefined) {
+                        
+    jQuery(function($, undefined) {            
         var start = (term) => {
             var connection = new signalR.HubConnection('/hub');
 
@@ -78,6 +79,9 @@
                         case "HandlerResult":
                             term.echo("Error: " + data.errors[0]);
                             break;
+                        case "OpenOrders":
+                            vm.openOrders(data.orders);
+                            break
                         default:
                             break;
                     }

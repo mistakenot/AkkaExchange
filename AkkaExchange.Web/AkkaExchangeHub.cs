@@ -5,6 +5,8 @@ using AkkaExchange.Client.Extensions;
 using Microsoft.AspNetCore.SignalR;
 using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
+using AkkaExchange.Shared.Extensions;
+using AkkaExchange.Orders.Events;
 
 namespace AkkaExchange.Web
 {
@@ -40,7 +42,11 @@ namespace AkkaExchange.Web
                 .Merge(
                     _akkaExchange.Queries.PlacedOrderVolumePerTenSeconds.Cast<object>())
                 .Merge(
-                    _akkaExchange.Queries.ClientManagerState.NumberOfConnectedClientsQuery().Cast<object>());
+                    _akkaExchange.Queries.ClientManagerState.NumberOfConnectedClientsQuery().Cast<object>())
+                .Merge(
+                    _akkaExchange.Queries.OrderBookState.OpenOrders(client.ClientId))
+                .Merge(
+                    _akkaExchange.Queries.OrderEventStream.Match<CompleteOrderEvent, IEvent>().CompletedOrders());
             
             _subscriptions.TryAdd(Context.ConnectionId, observable);
             
