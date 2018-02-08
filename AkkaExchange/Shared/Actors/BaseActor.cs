@@ -42,6 +42,7 @@ namespace AkkaExchange.Shared.Actors
                     _globalActorRefs.ErrorEventSubscriber.Tell(
                         new HandlerErrorEvent(
                             PersistenceId,
+                            this.GetType().ToString(),
                             handlerResult),
                         Self);
                 }

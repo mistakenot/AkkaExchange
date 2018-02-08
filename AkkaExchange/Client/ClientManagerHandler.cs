@@ -55,7 +55,7 @@ namespace AkkaExchange.Client
                 }
             }
 
-            return HandlerResult.NotHandled;
+            return HandlerResult.NotHandled(command);
         }
     }
 }

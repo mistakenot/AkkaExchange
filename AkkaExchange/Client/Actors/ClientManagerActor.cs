@@ -31,6 +31,7 @@ namespace AkkaExchange.Client.Actors
             if (message is CompleteOrderCommand completeOrderCommand)
             {
                 Context.Child(completeOrderCommand.Order.ClientId.ToString()).Tell(message, Sender);
+                return;
             }
 
             base.OnCommand(message);

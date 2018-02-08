@@ -40,7 +40,7 @@ namespace AkkaExchange.Execution
                 }
             }
 
-            return HandlerResult.NotHandled;
+            return HandlerResult.NotHandled(command);
         }
     }
 }

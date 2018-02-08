@@ -38,6 +38,7 @@ namespace AkkaExchange
         private readonly IEventsQueryFactory _eventsQueryFactory;
         private readonly StateQueryFactory<ClientState> _clientStateQueryFactory;
         private readonly IActorRef _orderExecutorManager;
+        private readonly IDisposable _errorStreamLoggerSubscription;
 
         public AkkaExchange(
             ContainerBuilder container, 
@@ -60,6 +61,9 @@ namespace AkkaExchange
 
             globalActorRefs.ErrorEventSubscriber = queries.HandlerErrorEventsSource;
             Queries = queries;
+
+            _errorStreamLoggerSubscription = Queries.HandlerErrorEvents.Subscribe(e =>
+                _logger.LogInformation(e.ToString()));
 
             // Used in client actor
             container.RegisterInstance(Queries.OrderBookState);
@@ -101,6 +105,7 @@ namespace AkkaExchange
         public void Dispose()
         {
             _system.Dispose();
+            _logger.LogInformation("Disposed of AkkaExchange.");
         }
 
         public async Task<AkkaExchangeClient> NewConnection()

@@ -54,7 +54,7 @@ namespace AkkaExchange.Orders
                 }
                 else
                 {
-                    return HandlerResult.NotFound(command);
+                    return new HandlerResult($"Order ID {removeOrderCommand.OrderId} not found.");
                 }
             }
 
@@ -84,7 +84,7 @@ namespace AkkaExchange.Orders
                 }
             }
 
-            return HandlerResult.NotHandled;
+            return HandlerResult.NotHandled(command);
         }
     }
 }

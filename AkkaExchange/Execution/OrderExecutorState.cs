@@ -29,7 +29,7 @@ namespace AkkaExchange.Execution
             {
                 return new OrderExecutorState(
                     OrderId,
-                    OrderExecutorStatus.InProgress);
+                    OrderExecutorStatus.Pending);
             }
 
             return this;

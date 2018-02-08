@@ -16,7 +16,7 @@ namespace AkkaExchange.Client.Extensions
                     s.OpenOrders.Where(o => o.ClientId == clientId).ToHashSet()));
 
         public static IObservable<CompleteOrders> CompletedOrders(this IObservable<CompleteOrderEvent> events)
-            => events.Aggregate(
+            => events.Scan(
                 new CompleteOrders(100),
                 (state, e) => state.Add(e.Order));
     }

@@ -28,7 +28,7 @@ namespace AkkaExchange.Tests.Akka
                 var graph = source.ToMaterialized(sink, Keep.Left);
                 var actor = graph.Run(materializer);
 
-                var msg = new HandlerErrorEvent("", HandlerResult.NotHandled);
+                var msg = new HandlerErrorEvent("", "", HandlerResult.NotHandled);
 
                 actor.Tell(msg, ActorRefs.Nobody);
 
@@ -60,7 +60,7 @@ namespace AkkaExchange.Tests.Akka
                 
                 subscriber.Verify(s => s.OnSubscribe(It.IsAny<ISubscription>()));
 
-                var evnt = new HandlerErrorEvent("", HandlerResult.NotHandled);
+                var evnt = new HandlerErrorEvent("", "", HandlerResult.NotHandled);
                 actor.Tell(evnt, ActorRefs.Nobody);
 
                 base.AwaitCondition(() =>
@@ -92,7 +92,7 @@ namespace AkkaExchange.Tests.Akka
                 var subscription = probe.ExpectSubscription();
                 subscription.Request(1);
 
-                var evnt = new HandlerErrorEvent("", HandlerResult.NotHandled);
+                var evnt = new HandlerErrorEvent("", "", HandlerResult.NotHandled);
                 actor.Tell(evnt, ActorRefs.Nobody);
 
                 probe.ExpectNext(evnt);
@@ -110,7 +110,7 @@ namespace AkkaExchange.Tests.Akka
                 var graph = source.ToMaterialized(sink, Keep.Both);
                 var (actor, task) = graph.Run(materializer);
 
-                var msg = new HandlerErrorEvent("", HandlerResult.NotHandled);
+                var msg = new HandlerErrorEvent("", "", HandlerResult.NotHandled);
 
                 actor.Tell(msg, ActorRefs.Nobody);
 

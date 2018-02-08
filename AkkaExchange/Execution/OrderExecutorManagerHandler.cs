@@ -20,7 +20,7 @@ namespace AkkaExchange.Execution
                         beginOrderExecutionCommand.Order));
             }
 
-            return HandlerResult.NotHandled;
+            return HandlerResult.NotHandled(command);
         }
     }
 }

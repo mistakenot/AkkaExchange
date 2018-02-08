@@ -97,7 +97,7 @@ namespace AkkaExchange.Client
                         completeOrderCommand.Order));
             }
 
-            return HandlerResult.NotHandled;
+            return HandlerResult.NotHandled(command);
         }
     }
 }

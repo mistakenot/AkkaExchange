@@ -31,17 +31,8 @@ namespace AkkaExchange.Utils
             Success = true;
         }
 
-        private HandlerResult()
-            : this("Command not handled.")
-        {
-            WasHandled = false;
-        }
-
-        public static HandlerResult NotFound(object command) => 
+        public static HandlerResult NotHandled(object command) => 
             new HandlerResult(
-                $"Event type {command.GetType()} not supported by handler.");
-
-        public static readonly HandlerResult NotHandled =
-            new HandlerResult();
+                $"Event type {command.GetType().FullName} not supported by handler.");
     }
 }
