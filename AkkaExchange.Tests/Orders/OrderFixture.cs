@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using AkkaExchange.Orders;
 using AkkaExchange.Utils;
 using Xunit;
@@ -17,7 +18,7 @@ namespace AkkaExchange.Tests.Orders
 
         protected static TEvent AssertSuccess<TEvent>(HandlerResult result)
         {
-            Assert.True(result.Success);
+            Assert.True(result.Success, result.Errors.FirstOrDefault());
             Assert.True(result.WasHandled);
             Assert.Empty(result.Errors);
             return Assert.IsType<TEvent>(result.Event);

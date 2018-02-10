@@ -10,14 +10,9 @@ namespace AkkaExchange.Execution
         {
             if (command is BeginOrderExecutionCommand beginOrderExecutionCommand)
             {
-                if (state.ExecutingObservables.ContainsKey(beginOrderExecutionCommand.Order.OrderId))
-                {
-                    return new HandlerResult($"Order ID {beginOrderExecutionCommand.Order.OrderId} is already executing.");
-                }
-
                 return new HandlerResult(
                     new BeginOrderExecutionEvent(
-                        beginOrderExecutionCommand.Order));
+                        beginOrderExecutionCommand.Match));
             }
 
             return HandlerResult.NotHandled(command);

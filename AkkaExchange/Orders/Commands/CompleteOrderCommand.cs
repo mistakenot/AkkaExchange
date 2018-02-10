@@ -2,13 +2,13 @@
 
 namespace AkkaExchange.Orders.Commands
 {
-    public class CompleteOrderCommand : Message, ICommand
+    public class CompleteOrdersCommand : Message, ICommand
     {
-        public Guid OrderId { get; }
+        public OrderMatch Match { get; }
 
-        public CompleteOrderCommand(Guid orderId)
+        public CompleteOrdersCommand(OrderMatch orderMatch)
         {
-            OrderId = orderId;
+            Match = orderMatch ?? throw new ArgumentNullException(nameof(orderMatch));
         }
     }
 }

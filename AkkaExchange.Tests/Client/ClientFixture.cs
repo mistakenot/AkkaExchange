@@ -13,7 +13,6 @@ namespace AkkaExchange.Tests.Client
             DateTime.UtcNow.AddMinutes(-10),
             null,
             ImmutableList<ICommand>.Empty,
-            ImmutableList<PlacedOrder>.Empty,
             100m,
             100m);
 

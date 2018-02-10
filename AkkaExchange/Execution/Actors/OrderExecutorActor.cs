@@ -12,7 +12,6 @@ namespace AkkaExchange.Execution.Actors
     {
         private readonly IOrderExecutor _orderExecutor;
         private readonly IActorRef _orderExecutorManager;
-        private readonly IDictionary<Guid, IDisposable> _orderExecutionEventSubscriptions;
 
         public OrderExecutorActor(
             IOrderExecutor orderExecutor,
@@ -24,28 +23,32 @@ namespace AkkaExchange.Execution.Actors
                     handler, 
                     globalActorRefs, 
                     defaultState, 
-                    defaultState.OrderId.ToString())
+                    defaultState.OrderExecutorId.ToString())
         {
             _orderExecutor = orderExecutor;
             _orderExecutorManager = orderExecutorManager ?? throw new ArgumentNullException(nameof(orderExecutorManager));
-            _orderExecutionEventSubscriptions = new Dictionary<Guid, IDisposable>();
         }
 
         protected override void OnPersist(IEvent persistedEvent)
         {
             if (persistedEvent is BeginOrderExecutionEvent beginOrderExecutionEvent)
             {
-                var orderId = beginOrderExecutionEvent.Order.OrderId;
-                var executionEvents = _orderExecutor.Execute(beginOrderExecutionEvent.Order);
-                var self = Self;
-                var executionEventsSubscription = executionEvents.Subscribe(e =>
-                {
-                    self.Tell(new UpdateOrderExecutionStatusCommand(e, orderId), self);
-                });
-
-                _orderExecutionEventSubscriptions.Add(
-                    orderId, 
-                    executionEventsSubscription);
+                _orderExecutor
+                    .Execute(beginOrderExecutionEvent.Match)
+                    .PipeTo(
+                        Self, 
+                        Self, 
+                        () => 
+                            new UpdateOrderExecutionStatusCommand(
+                                OrderExecutorStatus.Complete,
+                                beginOrderExecutionEvent.Match,
+                                beginOrderExecutionEvent.OrderExecutionId),
+                        e => 
+                            new UpdateOrderExecutionStatusCommand(
+                                OrderExecutorStatus.Error,
+                                beginOrderExecutionEvent.Match,
+                                beginOrderExecutionEvent.OrderExecutionId)
+                        );
             }
 
             if (persistedEvent is UpdateOrderExecutionStatusEvent updateOrderExecutionStatusEvent &&
@@ -54,20 +57,11 @@ namespace AkkaExchange.Execution.Actors
                 _orderExecutorManager.Tell(
                     new UpdateOrderExecutionStatusCommand(
                         OrderExecutorStatus.Complete, 
+                        updateOrderExecutionStatusEvent.Match,
                         updateOrderExecutionStatusEvent.OrderId));
             }
 
             base.OnPersist(persistedEvent);
-        }
-
-        public override void AroundPostStop()
-        {
-            foreach (var orderExecutionEventSubscription in _orderExecutionEventSubscriptions)
-            {
-                orderExecutionEventSubscription.Value.Dispose();
-            }
-
-            base.AroundPostStop();
         }
     }
 }

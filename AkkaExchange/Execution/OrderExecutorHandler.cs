@@ -10,18 +10,19 @@ namespace AkkaExchange.Execution
         {
             if (command is BeginOrderExecutionCommand beginOrderExecutionCommand)
             {
-                if (state.OrderId != beginOrderExecutionCommand.Order.OrderId)
+                if (state.Status != OrderExecutorStatus.Pending)
                 {
-                    return new HandlerResult($"Wrong client id.");
+                    return new HandlerResult(
+                        $"Invalid starting state - {(int)state.Status} is not equal to {(int)OrderExecutorStatus.Pending}.");
                 }
 
                 return new HandlerResult(
-                    new BeginOrderExecutionEvent(beginOrderExecutionCommand.Order));
+                    new BeginOrderExecutionEvent(beginOrderExecutionCommand.Match));
             }
 
             if (command is UpdateOrderExecutionStatusCommand updateOrderExecutionStatusCommand)
             {
-                if (updateOrderExecutionStatusCommand.OrderId != state.OrderId)
+                if (updateOrderExecutionStatusCommand.OrderExecutionId != state.OrderExecutorId)
                 {
                     return new HandlerResult($"Wrong client id.");
                 }
@@ -30,7 +31,8 @@ namespace AkkaExchange.Execution
                 {
                     return new HandlerResult(
                         new UpdateOrderExecutionStatusEvent(
-                            updateOrderExecutionStatusCommand.OrderId, 
+                            updateOrderExecutionStatusCommand.OrderExecutionId, 
+                            updateOrderExecutionStatusCommand.Match,
                             updateOrderExecutionStatusCommand.Status));
                 }
                 else

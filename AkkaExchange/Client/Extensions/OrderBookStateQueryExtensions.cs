@@ -18,7 +18,7 @@ namespace AkkaExchange.Client.Extensions
         public static IObservable<CompleteOrders> CompletedOrders(this IObservable<CompleteOrderEvent> events)
             => events.Scan(
                 new CompleteOrders(100),
-                (state, e) => state.Add(e.Order));
+                (state, e) => state.Add(e.Bid).Add(e.Ask));
     }
 
     public class CompleteOrders : Message

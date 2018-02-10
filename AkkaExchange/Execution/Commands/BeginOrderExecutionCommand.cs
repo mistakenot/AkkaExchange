@@ -5,11 +5,11 @@ namespace AkkaExchange.Execution.Commands
 {
     public class BeginOrderExecutionCommand : Message, ICommand
     {
-        public PlacedOrder Order { get; }
-
-        public BeginOrderExecutionCommand(PlacedOrder order)
+        public OrderMatch Match { get; }
+        
+        public BeginOrderExecutionCommand(OrderMatch match)
         {
-            Order = order ?? throw new ArgumentNullException(nameof(order));
+            Match = match ?? throw new ArgumentNullException(nameof(match));
         }
     }
 }

@@ -1,34 +1,41 @@
 ﻿using System;
 using AkkaExchange.Execution.Events;
+using AkkaExchange.Orders;
 
 namespace AkkaExchange.Execution
 {
     public class OrderExecutorState : Message, IState<OrderExecutorState>
     {
-        public Guid OrderId { get; }
+        public Guid OrderExecutorId { get; }
+        public OrderMatch Match { get; }
         public OrderExecutorStatus Status { get; }
 
-        public OrderExecutorState(Guid orderId)
-            : this(orderId, OrderExecutorStatus.Pending)
+        public OrderExecutorState(OrderMatch orderMatch)
+            : this(
+                Guid.NewGuid(), 
+                orderMatch, 
+                OrderExecutorStatus.Pending)
         {
             
         }
 
         public OrderExecutorState(
-            Guid orderId, 
+            Guid orderExecutorId,
+            OrderMatch orderMatch,
             OrderExecutorStatus status)
         {
-            OrderId = orderId;
+            OrderExecutorId = orderExecutorId;
+            Match = orderMatch;
             Status = status;
         }
 
         public OrderExecutorState Update(IEvent evnt)
         {
-            if (evnt is BeginOrderExecutionEvent beginOrderExecutionEvent && 
-                beginOrderExecutionEvent.Order.OrderId == OrderId)
+            if (evnt is BeginOrderExecutionEvent beginOrderExecutionEvent)
             {
                 return new OrderExecutorState(
-                    OrderId,
+                    beginOrderExecutionEvent.OrderExecutionId,
+                    beginOrderExecutionEvent.Match,
                     OrderExecutorStatus.Pending);
             }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reactive.Subjects;
 using System.Threading;
+using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.TestKit;
 using AkkaExchange.Execution;
@@ -23,20 +24,29 @@ namespace AkkaExchange.Tests.Execution
         private readonly OrderExecutorState _defaultState;
         private readonly TestProbe _orderExecutorManager;
         private readonly Subject<OrderExecutorStatus> _executorSubject;
-        private readonly PlacedOrder _order;
+        private readonly OrderMatch _order;
 
         public OrderExecutorActorTests()
         {
             _orderExecutorMock = new Mock<IOrderExecutor>();
             _commandHandler = new Mock<ICommandHandler<OrderExecutorState>>();
-            _defaultState = new OrderExecutorState(Guid.NewGuid());
+            _defaultState = new OrderExecutorState(_order);
             _orderExecutorManager = CreateTestProbe();
             _executorSubject = new Subject<OrderExecutorStatus>();
-            _order = new PlacedOrder(
+
+            var bid =  new PlacedOrder(
+                new Order(
+                    Guid.NewGuid(), 1m, 1m, OrderSide.Bid),
+                DateTime.UtcNow,
+                Guid.NewGuid());
+
+            var ask =  new PlacedOrder(
                 new Order(
                     Guid.NewGuid(), 1m, 1m, OrderSide.Ask),
-                DateTime.UtcNow,
-                _defaultState.OrderId);
+                    DateTime.UtcNow,
+                    Guid.NewGuid());
+            
+            _order = new OrderMatch(bid, ask);
 
             _commandHandler
                 .Setup(m => m.Handle(
@@ -50,12 +60,13 @@ namespace AkkaExchange.Tests.Execution
                 .Returns(
                     new HandlerResult(
                         new UpdateOrderExecutionStatusEvent(
-                            _order.OrderId,
+                            Guid.NewGuid(),
+                            _order,
                             OrderExecutorStatus.InProgress)));
 
             _orderExecutorMock
-                .Setup(m => m.Execute(It.IsAny<PlacedOrder>()))
-                .Returns(_executorSubject);
+                .Setup(m => m.Execute(It.IsAny<OrderMatch>()))
+                .Returns(Task.FromResult(0));
         }
 
         // [Fact]
@@ -77,7 +88,7 @@ namespace AkkaExchange.Tests.Execution
 
                 _executorSubject.OnNext(OrderExecutorStatus.Complete);
                 
-                Thread.Sleep(5000000);
+                Thread.Sleep(500);
                 _orderExecutorManager.ExpectMsg<UpdateOrderExecutionStatusCommand>(TimeSpan.MaxValue);
             });
         }

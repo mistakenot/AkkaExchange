@@ -2,6 +2,7 @@
 using AkkaExchange.Execution.Commands;
 using AkkaExchange.Orders.Commands;
 using AkkaExchange.Utils;
+using System;
 
 namespace AkkaExchange.Execution.Actors
 {
@@ -25,35 +26,33 @@ namespace AkkaExchange.Execution.Actors
         {
             if (message is BeginOrderExecutionCommand beginOrderExecutionCommand)
             {
-                var orderId = beginOrderExecutionCommand.Order.OrderId.ToString();
+                var state = new OrderExecutorState(beginOrderExecutionCommand.Match);
 
-                if (Context.Child(orderId) == ActorRefs.Nobody)
-                {
-                    var props = Props.Create<OrderExecutorActor>(
-                        _orderExecutor,
-                        _handler,
-                        _globalActorRefs,
-                        Self,
-                        new OrderExecutorState(beginOrderExecutionCommand.Order.OrderId));
+                var props = Props.Create<OrderExecutorActor>(
+                    _orderExecutor,
+                    _handler,
+                    _globalActorRefs,
+                    Self,
+                    state);
 
-                    var child = Context.ActorOf(props, orderId);
+                var child = Context.ActorOf(props, state.OrderExecutorId.ToString());
 
-                    child.Tell(beginOrderExecutionCommand, Sender);
-                }
+                child.Tell(beginOrderExecutionCommand, Sender);
             }
 
             if (message is UpdateOrderExecutionStatusCommand updateOrderExecutionStatusCommand &&
                 updateOrderExecutionStatusCommand.Status == OrderExecutorStatus.Complete)
             {
-                var orderId = updateOrderExecutionStatusCommand.OrderId.ToString();
+                var orderExecutionId = updateOrderExecutionStatusCommand.OrderExecutionId.ToString();
 
-                if (Context.Child(orderId) != ActorRefs.Nobody)
+                if (Context.Child(orderExecutionId) != ActorRefs.Nobody)
                 {
-                    var child = Context.Child(orderId);
+                    var child = Context.Child(orderExecutionId);
                     Context.Stop(child);
 
                     _globalActorRefs.OrderBook.Tell(
-                        new CompleteOrderCommand(updateOrderExecutionStatusCommand.OrderId),
+                        new CompleteOrdersCommand(
+                            updateOrderExecutionStatusCommand.Match),
                         Self);
                 }
             }

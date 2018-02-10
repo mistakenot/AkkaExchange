@@ -63,24 +63,24 @@ namespace AkkaExchange.Orders
                 var result = _orderMatcher.Match(state.OpenOrders);
 
                 return new HandlerResult(
-                    new MatchedOrdersEvent(
-                        result, 
-                        typeof(DefaultOrderMatcher).FullName));
+                    new MatchedOrdersEvent(result));
             }
 
-            if (command is CompleteOrderCommand completeOrderCommand)
+            if (command is CompleteOrdersCommand completeOrderCommand)
             {
-                if (state.ExecutingOrders.Any(o => o.OrderId == completeOrderCommand.OrderId))
+                if (state.ExecutingOrders.Any(o => o.OrderId == completeOrderCommand.Match.Bid.OrderId) &&
+                    state.ExecutingOrders.Any(o => o.OrderId == completeOrderCommand.Match.Ask.OrderId))
                 {
-                    var order = state.ExecutingOrders.Single(o => o.OrderId == completeOrderCommand.OrderId);
+                    var bid = state.ExecutingOrders.Single(o => o.OrderId == completeOrderCommand.Match.Bid.OrderId);
+                    var ask = state.ExecutingOrders.Single(o => o.OrderId == completeOrderCommand.Match.Ask.OrderId);
 
                     return new HandlerResult(
-                        new CompleteOrderEvent(order));
+                        new CompleteOrderEvent(bid, ask));
                 }
                 else
                 {
                     return new HandlerResult(
-                        $"Order id {completeOrderCommand.OrderId} not found in executing orders.");
+                        $"Order id {completeOrderCommand.Match.Bid.OrderId} or {completeOrderCommand.Match.Ask.OrderId} not found in executing orders.");
                 }
             }
 

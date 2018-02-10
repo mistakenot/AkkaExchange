@@ -55,27 +55,54 @@ namespace AkkaExchange.Tests.Orders
         }
 
         [Fact]
-        public void OrderBookState_CompleteOrdersCommand_Ok()
+        public void OrderBookState_CompleteOrdersEvent_Ok()
         {
             var bid = Bid(1m, 1m);
+            var ask = Ask(1m, 1m);
 
             var state = new OrderBookState(
                 ImmutableList<PlacedOrder>.Empty,
-                ImmutableList<PlacedOrder>.Empty.Add(bid),
+                ImmutableList<PlacedOrder>.Empty.Add(bid).Add(ask),
                 ImmutableList<PlacedOrder>.Empty);
 
             var result = state
-                .Update(new CompleteOrderEvent(bid));
+                .Update(new CompleteOrderEvent(bid, ask));
 
             Assert.Empty(result.OpenOrders);
             Assert.Empty(result.ExecutingOrders);
-            Assert.Single(result.CompleteOrders);
+            Assert.Equal(2, result.CompleteOrders.Count);
+        }
+
+        [Fact]
+        public void OrderBookState_CompletesPartialOrders_Ok()
+        {
+            var bid = Bid(2m, 1m);
+            var ask = Ask(1m, 1m);
+
+            var state = new OrderBookState(
+                ImmutableList<PlacedOrder>.Empty,
+                ImmutableList<PlacedOrder>.Empty.Add(bid).Add(ask),
+                ImmutableList<PlacedOrder>.Empty);
+
+            var result = state
+                .Update(
+                    new CompleteOrderEvent(
+                        bid.WithAmount(1m),
+                        ask));
+            
+            Assert.Empty(result.ExecutingOrders);
+            var bidResult = Assert.Single(result.OpenOrders) as PlacedOrder;
+
+            Assert.Equal(1m, bidResult.Amount);
+            Assert.Equal(bid.Price, bidResult.Price);
+            Assert.Equal(bid.ClientId, bidResult.ClientId);
+            Assert.Equal(bid.OrderId, bidResult.OrderId);
+            Assert.Equal(bid.Side, bidResult.Side);
         }
 
         private static MatchedOrdersEvent Match(PlacedOrder bid, PlacedOrder ask) => 
             new MatchedOrdersEvent(
                 new OrderMatchResult(
-                    new[] { new OrderMatch(bid, ask) }),
-                "");
+                    new[] { new OrderMatch(bid, ask) }));
     }
 }

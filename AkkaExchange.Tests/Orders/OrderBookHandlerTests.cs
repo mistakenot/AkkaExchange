@@ -76,16 +76,21 @@ namespace AkkaExchange.Tests.Orders
         [Fact]
         public void OrderBookHandler_ReceivesValidCompleteOrderCommand_HandlesOk()
         {
-            var placedOrder = new PlacedOrder(_order);
+            var bid = Bid(1m, 1m);
+            var ask = Ask(1m, 1m);
+
             var result = _subject.Handle(
                 new OrderBookState(
                     ImmutableList<PlacedOrder>.Empty,
-                    ImmutableList<PlacedOrder>.Empty.Add(placedOrder),
+                    ImmutableList<PlacedOrder>.Empty.Add(bid).Add(ask),
                     ImmutableList<PlacedOrder>.Empty),
-                new CompleteOrderCommand(placedOrder.OrderId));
+                new CompleteOrdersCommand(
+                    new OrderMatch(bid, ask)));
 
             var evnt = AssertSuccess<CompleteOrderEvent>(result);
-            Assert.Equal(placedOrder.OrderId, evnt.Order.OrderId);
+
+            Assert.Equal(bid.OrderId, evnt.Bid.OrderId);
+            Assert.Equal(ask.OrderId, evnt.Ask.OrderId);
         }
     }
 }

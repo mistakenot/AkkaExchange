@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Threading.Tasks;
 using AkkaExchange.Orders;
 
 namespace AkkaExchange.Execution
 {
     public interface IOrderExecutor
     {
-        IObservable<OrderExecutorStatus> Execute(PlacedOrder order);
+        Task Execute(OrderMatch matchedOrders);
     }
 }

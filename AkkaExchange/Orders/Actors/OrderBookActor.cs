@@ -35,17 +35,18 @@ namespace AkkaExchange.Orders.Actors
                 foreach (var matchedOrdersMatch in matchedOrdersEvent.MatchedOrders.Matches)
                 {
                     _orderExecutorManager.Tell(
-                        new BeginOrderExecutionCommand(matchedOrdersMatch.Bid));
-
-                    _orderExecutorManager.Tell(
-                        new BeginOrderExecutionCommand(matchedOrdersMatch.Ask));
+                        new BeginOrderExecutionCommand(
+                            matchedOrdersMatch));
                 }
             }
 
             if (persistedEvent is CompleteOrderEvent completeOrderEvent)
             {
-                var evnt = new Client.Commands.CompleteOrderCommand(completeOrderEvent.Order);
-                _clientManager.Tell(evnt, Self);
+                var askEvent = new Client.Commands.CompleteOrderCommand(completeOrderEvent.Ask);
+                var bidEvent = new Client.Commands.CompleteOrderCommand(completeOrderEvent.Bid);
+                
+                _clientManager.Tell(askEvent, Self);
+                _clientManager.Tell(bidEvent, Self);
             }
 
             base.OnPersist(persistedEvent);

@@ -68,11 +68,23 @@ namespace AkkaExchange.Orders
 
             if (evnt is CompleteOrderEvent completeOrderEvent)
             {
+                var bid = ExecutingOrders.Single(o => o.OrderId == completeOrderEvent.Bid.OrderId);
+                var ask = ExecutingOrders.Single(o => o.OrderId == completeOrderEvent.Ask.OrderId);
+
+                var remainingBid = bid.WithAmount(bid.Amount - completeOrderEvent.Bid.Amount);
+                var remainingAsk = ask.WithAmount(ask.Amount - completeOrderEvent.Ask.Amount);
+
+                var remaining = new [] {remainingBid, remainingAsk}.Where(o => o.Amount > 0m);
+
                 return new OrderBookState(
-                    OpenOrders,
-                    ExecutingOrders.RemoveAll(o => o.OrderId == completeOrderEvent.Order.OrderId),
-                    CompleteOrders.Add(
-                        ExecutingOrders.Single(o => o.OrderId == completeOrderEvent.Order.OrderId)));
+                    OpenOrders
+                        .AddRange(remaining),
+                    ExecutingOrders
+                        .RemoveAll(o => o.OrderId == completeOrderEvent.Bid.OrderId)
+                        .RemoveAll(o => o.OrderId == completeOrderEvent.Ask.OrderId),
+                    CompleteOrders
+                        .Add(completeOrderEvent.Bid)
+                        .Add(completeOrderEvent.Ask));
             }
 
             return this;

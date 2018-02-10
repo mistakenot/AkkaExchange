@@ -21,9 +21,11 @@ namespace AkkaExchange.Execution
             {
                 return new OrderExecutorManagerState(
                     ExecutingObservables.Add(
-                        beginOrderExecutionEvent.Order.OrderId,
+                        beginOrderExecutionEvent.OrderExecutionId,
                         new OrderExecutorState(
-                            beginOrderExecutionEvent.Order.OrderId)));
+                            beginOrderExecutionEvent.OrderExecutionId,
+                            beginOrderExecutionEvent.Match,
+                        OrderExecutorStatus.InProgress)));
             }
 
             return this;

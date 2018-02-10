@@ -110,7 +110,7 @@ namespace AkkaExchange.Tests.Client
         }
 
         [Fact]
-        public void ClientState_ReceivesCompleteOrderEventBid_UpdatesOrderHistoryOk()
+        public void ClientState_ReceivesCompleteOrderEventAsk_UpdatesBalanceOk()
         {
             ClientState_ReceivesStartConnectionEvent_Ok();
 
@@ -123,7 +123,24 @@ namespace AkkaExchange.Tests.Client
 
             _subject = _subject.Update(evnt);
 
-            Assert.Single(_subject.OrderHistory);
+            Assert.Equal(110m, _subject.Balance);
+        }
+
+        [Fact]
+        public void ClientState_ReceivesCompleteOrderEventBid_UpdatesBalanceOk()
+        {
+            ClientState_ReceivesStartConnectionEvent_Ok();
+
+            var order = new PlacedOrder(
+                new Order(Guid.Empty, 10m, 1m, OrderSide.Bid),
+                DateTime.UtcNow.AddSeconds(-1),
+                Guid.Empty);
+
+            var evnt = new CompleteOrderEvent(order);
+
+            _subject = _subject.Update(evnt);
+
+            Assert.Equal(90m, _subject.Balance);
         }
     }
 }
