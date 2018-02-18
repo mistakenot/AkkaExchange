@@ -62,34 +62,30 @@ namespace AkkaExchange.Tests.Execution
                         new UpdateOrderExecutionStatusEvent(
                             Guid.NewGuid(),
                             _order,
-                            OrderExecutorStatus.InProgress)));
+                            OrderExecutorStatus.Complete)));
 
             _orderExecutorMock
                 .Setup(m => m.Execute(It.IsAny<OrderMatch>()))
                 .Returns(Task.FromResult(0));
         }
 
-        // [Fact]
+        [Fact]
         public void OrderExecutorActor_CompletedExecution_NotifiesManager()
         {
-            Within(TimeSpan.FromSeconds(1), () =>
+            Within(TimeSpan.FromSeconds(3), () =>
             {
                 var props = Props.Create<OrderExecutorActor>(
                     _orderExecutorMock.Object,
                     _commandHandler.Object,
+                    new GlobalActorRefs(),
                     _orderExecutorManager.Ref,
                     _defaultState);
 
                 var subject = Sys.ActorOf(props);
 
                 subject.Tell(new BeginOrderExecutionCommand(_order), ActorRefs.Nobody);
-
-                Thread.Sleep(5000);
-
-                _executorSubject.OnNext(OrderExecutorStatus.Complete);
                 
-                Thread.Sleep(500);
-                _orderExecutorManager.ExpectMsg<UpdateOrderExecutionStatusCommand>(TimeSpan.MaxValue);
+                _orderExecutorManager.ExpectMsg<UpdateOrderExecutionStatusCommand>(TimeSpan.FromSeconds(3));
             });
         }
     }

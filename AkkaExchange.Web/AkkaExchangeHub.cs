@@ -44,9 +44,7 @@ namespace AkkaExchange.Web
                 .Merge(
                     _akkaExchange.Queries.ClientManagerState.NumberOfConnectedClientsQuery().Cast<object>())
                 .Merge(
-                    _akkaExchange.Queries.OrderBookState.OpenOrders(client.ClientId))
-                .Merge(
-                    _akkaExchange.Queries.OrderEventStream.Match<CompleteOrderEvent, IEvent>().CompletedOrders());
+                    _akkaExchange.Queries.OrderBookState);
             
             _subscriptions.TryAdd(Context.ConnectionId, observable);
             

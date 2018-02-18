@@ -34,10 +34,11 @@
                 <p>Number of Clients: <strong data-bind="text: numberOfClients"></strong></p>
                 <p>Open Orders:</p>
                 <ul data-bind="foreach: openOrders">
-                    <li>Id: <strong data-bind="text: orderId"></strong></li>
+                    <li>Price: <strong data-bind="text: price"></strong> Amount: <strong data-bind="text: amount"></strong> Is Bid: <strong data-bind="text: side"></strong></li>
                 </ul>
             </div>
             <div class="col-6">
+                <p>Price History</p>
                 <div id="price-graph"></div>
             </div>
         </div>
@@ -64,15 +65,15 @@
         var start = (term) => {
             var connection = new signalR.HubConnection('/hub');
 
-            var draw = function() {
+            var draw = function(x,y) {
                 var div = document.getElementById("price-graph");
-                Plotly.plot( div, [{
-                    x: [1, 2, 3, 4, 5],
-                    y: [1, 2, 4, 8, 16] }], {
+                Plotly.newPlot( div, [{
+                    x: x,
+                    y: y }], {
                     margin: { t: 0 } } );
             }
 
-            draw();
+            draw([], []);
             
             connection.on('send',
                 data => {
@@ -96,10 +97,17 @@
                         case "OpenOrders":
                             vm.openOrders(data.orders);
                             break
+                        case "OrderBookState":
+                            var x = data.completeOrders.filter(o => o.side == 0).map(o => o.placedAt);
+                            var y = data.completeOrders.filter(o => o.side == 0).map(o => o.price);
+                            draw(x, y);
+                            var openOrders = data.openOrders.filter(o => o.clientId === vm.connectionId());
+                            vm.openOrders(openOrders);
                         default:
                             break;
                     }
                     
+                    term.echo("Received " + data.type + " message.");
                     console.log(data);
                 });
 
@@ -111,10 +119,7 @@
                     this.echo("AKKAEXCHANGE CLIENT REPL\n" +
                         " help                                displays help text and commands.\n" +
                         " bid [price] [quantity]              make a new bid (buy) offer.\n" +
-                        " ask [price] [quantity]              make a new ask (sell) offer.\n" +
-                        " orders                              list current open orders.\n" +
-                        " cancel [order id]                   cancel an order.\n" +
-                        " amend [order id] [price] [quantity] amend an order.");
+                        " ask [price] [quantity]              make a new ask (sell) offer.\n");
                 },
                 bid: function (price, amount) {
                     connection.invoke('bid', price, amount);

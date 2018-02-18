@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
 
 namespace AkkaExchange.Orders.Extensions
 {
@@ -26,5 +29,16 @@ namespace AkkaExchange.Orders.Extensions
                     order.Side),
                 order.PlacedAt,
                 order.OrderId);
+
+        public static IObservable<ILookup<Guid, PlacedOrder>> CompleteOrdersGroupedByClientId(this IObservable<OrderBookState> observable) =>
+            observable.Select(book =>
+                book.CompleteOrders.ToLookup(o => o.ClientId));
+
+        public static IObservable<ILookup<Guid, PlacedOrder>> IncompleteOrdersGroupedByClientId(this IObservable<OrderBookState> observable) =>
+            observable.Select(book =>
+                book.OpenOrders.Concat(book.ExecutingOrders).ToLookup(o => o.ClientId));
+
+        public static IObservable<IEnumerable<PlacedOrder>> CompleteOrders(this IObservable<OrderBookState> observable) =>
+            observable.Select(book => book.CompleteOrders).DistinctUntilChanged(orders => orders.Count);
     }
 }

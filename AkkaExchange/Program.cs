@@ -6,6 +6,7 @@ using Akka.Configuration;
 using AkkaExchange.Client.Extensions;
 using AkkaExchange.Orders;
 using AkkaExchange.Orders.Events;
+using AkkaExchange.Orders.Extensions;
 using AkkaExchange.Shared.Extensions;
 using AkkaExchange.Utils;
 using Autofac;
@@ -36,12 +37,14 @@ namespace AkkaExchange
                 
                 var orderBookSubscription = exchange.Queries.OrderBookState.Subscribe(s => 
                     Console.WriteLine($"Open: {s.OpenOrders.Count}, Executing: {s.ExecutingOrders.Count}, Complete: {s.CompleteOrders.Count}."));
+                var orderBookEvents = exchange.Queries.OrderEventStream.Subscribe(e =>
+                    Console.WriteLine($"OrderBookEvent: {e.GetType().FullName}"));
                 var placedOrderVolumeSubscription = exchange.Queries.PlacedOrderVolumePerTenSeconds.Subscribe(s => 
                     Console.WriteLine($"Volume in last minute: {s.Volume}"));
                 var errorSubscription = exchange.Queries.HandlerErrorEvents.Subscribe(e => 
                     Console.WriteLine($"Error: {e.ToString()}"));
-                var orderCompleteSubscription = exchange.Queries.OrderEventStream.Match<CompleteOrderEvent, IEvent>().CompletedOrders().Subscribe(e => 
-                    Console.WriteLine($"CompleteOrders: {e.Orders.Count()}"));
+                var orderCompleteSubscription = exchange.Queries.OrderBookState.CompleteOrders().Subscribe(orders => 
+                    Console.WriteLine($"CompleteOrders: {orders.Count()}"));
                     
                 client.NewOrder(1m, 1m, OrderSide.Ask);
                 client.NewOrder(1m, 1m, OrderSide.Bid);

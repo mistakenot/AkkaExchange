@@ -47,14 +47,15 @@ namespace AkkaExchange.Execution.Actors
 
                 if (Context.Child(orderExecutionId) != ActorRefs.Nobody)
                 {
+                    // TODO this isnt being hit.
                     var child = Context.Child(orderExecutionId);
                     Context.Stop(child);
-
-                    _globalActorRefs.OrderBook.Tell(
-                        new CompleteOrdersCommand(
-                            updateOrderExecutionStatusCommand.Match),
-                        Self);
                 }
+
+                _globalActorRefs.OrderBook.Tell(
+                    new CompleteOrdersCommand(
+                        updateOrderExecutionStatusCommand.Match),
+                    Self);
             }
         }
     }

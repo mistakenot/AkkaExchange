@@ -26,7 +26,8 @@ namespace AkkaExchange.Shared.Queries
 
         public IObservable<T> Create(string persistenceId)
         {
-            var source = _eventsByPersistenceIdQuery.EventsByPersistenceId(
+            var source = _eventsByPersistenceIdQuery
+                .EventsByPersistenceId(
                     persistenceId,
                     0,
                     long.MaxValue)
