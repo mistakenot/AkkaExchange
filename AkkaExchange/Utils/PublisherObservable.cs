@@ -11,6 +11,7 @@ namespace AkkaExchange.Utils
         {
             _publisher = publisher ?? throw new ArgumentNullException(nameof(publisher));
         }
+        
         public IDisposable Subscribe(IObserver<T> observer)
         {
             var subscriber = new ObserverSubscriber<T>(observer);

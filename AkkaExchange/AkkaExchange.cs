@@ -65,9 +65,6 @@ namespace AkkaExchange
             _errorStreamLoggerSubscription = Queries.HandlerErrorEvents.Subscribe(e =>
                 _logger.LogInformation(e.ToString()));
 
-            // Used in client actor
-            container.RegisterInstance(Queries.OrderBookState);
-
             _system.AddDependencyResolver(
                 new AutoFacDependencyResolver(container.Build(), _system));
 

@@ -12,7 +12,6 @@ namespace AkkaExchange.Client.Actors
     {
         private readonly ICanTell _orderBookActor;
         private readonly IActorRef _clientManagerActor;
-        private readonly IObservable<OrderBookState> _orderBookState;
 
         public ClientActor(
             ICommandHandler<ClientState> handler,
