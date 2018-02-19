@@ -1,7 +1,9 @@
 using System;
+using System.Linq;
 using Akka.Persistence.Query;
 using Akka.Streams;
 using Akka.Streams.Dsl;
+using AkkaExchange.Orders.Events;
 using AkkaExchange.Utils;
 
 namespace AkkaExchange.Orders.Queries
@@ -27,14 +29,16 @@ namespace AkkaExchange.Orders.Queries
             var orderBookSource = eventsByPersistenceIdQuery
                 .EventsByPersistenceId(orderBookPersistenceId, 0, long.MaxValue)
                 .Where(e => e.Event is IEvent)
-                .Select(e => e.Event as IEvent);
+                .Select(e => e.Event as IEvent)
+                .Where(e => !(e is MatchedOrdersEvent matchedOrdersEvent && 
+                              !matchedOrdersEvent.MatchedOrders.Matches.Any()));
             
             var orderBookEventsObservable = new SourceObservable<IEvent>(
                 orderBookSource, 
                 materializer);
 
             var orderBookStateSource = orderBookSource
-                .Aggregate(
+                .Scan(
                     Orders.OrderBookState.Empty, 
                     (s, e) => s.Update(e));
             

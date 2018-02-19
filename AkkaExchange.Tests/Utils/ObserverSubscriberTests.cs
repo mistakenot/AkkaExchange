@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using AkkaExchange.Utils;
 using Moq;
 using Reactive.Streams;
@@ -25,6 +26,17 @@ namespace AkkaExchange.Tests.Utils
             _subject.OnSubscribe(_subscriptionMock.Object);
 
             _subscriptionMock.Verify(s => s.Request(1));
+        }
+
+        [Fact]
+        public void ObserverSubscriber_WhenOnSubscribe_CompletesTask()
+        {
+            Assert.False(_subject.OnSubscribeTask.IsCompleted);
+
+            _subject.OnSubscribe(_subscriptionMock.Object);
+            _subject.OnSubscribeTask.Wait(TimeSpan.FromMilliseconds(10));
+
+            Assert.True(_subject.OnSubscribeTask.IsCompleted);
         }
 
         [Fact]

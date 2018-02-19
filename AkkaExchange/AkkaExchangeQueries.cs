@@ -17,36 +17,30 @@ namespace AkkaExchange
 {
     public interface IAkkaExchangeQueries
     {
-        IObservable<OrderBookState> OrderBookState { get; }
-        IObservable<PlacedOrderVolume> PlacedOrderVolumePerTenSeconds { get; }
+        IOrderQueries Orders { get; }
+
         IObservable<HandlerErrorEvent> HandlerErrorEvents { get; }
         IObservable<ClientManagerState> ClientManagerState { get; }
-        IObservable<IEvent> OrderEventStream { get; }
     }
     
     public class AkkaExchangeQueries : IAkkaExchangeQueries
     {
-        public IObservable<OrderBookState> OrderBookState { get; }
-        public IObservable<PlacedOrderVolume> PlacedOrderVolumePerTenSeconds { get; }
+        public IOrderQueries Orders { get; }
+
         public IObservable<HandlerErrorEvent> HandlerErrorEvents { get; }
         public IObservable<ClientManagerState> ClientManagerState { get; }
         public IActorRef HandlerErrorEventsSource { get; }
-        public IObservable<IEvent> OrderEventStream { get; }
 
         public AkkaExchangeQueries(
+            IOrderQueries orderQueries,
             IObservable<ClientManagerState> clientManagerState,
-            IObservable<OrderBookState> orderBookState, 
-            IObservable<PlacedOrderVolume> placedOrderVolumePerMinute,
             IObservable<HandlerErrorEvent> handlerErrorEvents,
-            IActorRef handlerErrorEventsSource,
-            IObservable<IEvent> orderEventStream)
+            IActorRef handlerErrorEventsSource)
         {
-            PlacedOrderVolumePerTenSeconds = placedOrderVolumePerMinute;
+            Orders = orderQueries;
             HandlerErrorEvents = handlerErrorEvents ?? throw new ArgumentNullException(nameof(handlerErrorEvents));
             HandlerErrorEventsSource = handlerErrorEventsSource ?? throw new ArgumentNullException(nameof(handlerErrorEventsSource));
-            OrderEventStream = orderEventStream ?? throw new ArgumentNullException(nameof(orderEventStream));
             ClientManagerState = clientManagerState ?? throw new ArgumentNullException(nameof(clientManagerState));
-            OrderBookState = orderBookState ?? throw new ArgumentNullException(nameof(orderBookState));
         }
 
         internal static AkkaExchangeQueries Create(
@@ -57,32 +51,20 @@ namespace AkkaExchange
                 eventsByPersistenceIdQuery, 
                 materializer, 
                 Client.ClientManagerState.Empty);
-
-            var orderBookQueryFactory = new StateQueryFactory<OrderBookState>(
-                eventsByPersistenceIdQuery, 
-                materializer, 
-                Orders.OrderBookState.Empty);
-
-            var placedOrderVolumeFactory = new PlacedOrderVolumeQueryFactory(
-                eventsByPersistenceIdQuery,
-                materializer);
             
             var handlerErrorFactory = new HandlerErrorQueryFactory(materializer);
             var (handlerErrorObservable, handlerErrorSource) = handlerErrorFactory.Create();
 
-            var orderBookEventStream = eventsByPersistenceIdQuery
-                .EventsByPersistenceId("order-book", 0, long.MaxValue)
-                .Where(e => e.Event is IEvent)
-                .Select(e => e.Event as IEvent)
-                .RunAsObservable(materializer);
+            var orderQueries = OrderQueries.Create(
+                "order-book",
+                eventsByPersistenceIdQuery,
+                materializer);
 
             return new AkkaExchangeQueries(
+                orderQueries,
                 clientManagerQueryFactory.Create("client-manager"),
-                orderBookQueryFactory.Create("order-book").DistinctUntilChanged(),
-                placedOrderVolumeFactory.Create("order-book", TimeSpan.FromSeconds(10)),
                 handlerErrorObservable,
-                handlerErrorSource,
-                orderBookEventStream);
+                handlerErrorSource);
         }
     }
 }

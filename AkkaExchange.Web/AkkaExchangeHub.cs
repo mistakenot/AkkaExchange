@@ -36,15 +36,13 @@ namespace AkkaExchange.Web
             var client = await _clients.GetClient(Context.ConnectionId);
             var observable = client.Events
                 .Merge(
-                    client.State.Cast<object>())
+                    client.State.Cast<Message>())
                 .Merge(
-                    client.Errors.Cast<object>())
+                    client.Errors.Cast<Message>())
                 .Merge(
-                    _akkaExchange.Queries.PlacedOrderVolumePerTenSeconds.Cast<object>())
+                    _akkaExchange.Queries.ClientManagerState.NumberOfConnectedClientsQuery().Cast<Message>())
                 .Merge(
-                    _akkaExchange.Queries.ClientManagerState.NumberOfConnectedClientsQuery().Cast<object>())
-                .Merge(
-                    _akkaExchange.Queries.OrderBookState);
+                    _akkaExchange.Queries.Orders.OrderBookState.Cast<Message>());
             
             _subscriptions.TryAdd(Context.ConnectionId, observable);
             
