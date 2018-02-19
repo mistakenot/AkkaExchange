@@ -65,16 +65,23 @@
         var start = (term) => {
             var connection = new signalR.HubConnection('/hub');
 
-            var draw = function(x,y) {
+            var draw = function(x,yPrice,yVol) {
                 var div = document.getElementById("price-graph");
-                Plotly.newPlot( div, [{
-                    x: x,
-                    y: y }], {
+                Plotly.newPlot( div, [
+                    {
+                        x: x,
+                        y: yPrice,
+                        name: 'Price' },
+                    {
+                        x: x,
+                        y: yVol,
+                        name: 'Volume'
+                    }], {
                     margin: { t: 0 } } );
             }
 
             draw([], []);
-            
+
             connection.on('send',
                 data => {
                     
@@ -99,8 +106,9 @@
                             break
                         case "OrderBookState":
                             var x = data.completeOrders.filter(o => o.side == 0).map(o => o.placedAt);
-                            var y = data.completeOrders.filter(o => o.side == 0).map(o => o.price);
-                            draw(x, y);
+                            var yPrice = data.completeOrders.filter(o => o.side == 0).map(o => o.price);
+                            var yVol = data.completeOrders.filter(o => o.side == 0).map(o => o.amount);
+                            draw(x, yPrice, yVol);
                             var openOrders = data.openOrders.filter(o => o.clientId === vm.connectionId());
                             vm.openOrders(openOrders);
                         default:
@@ -110,9 +118,13 @@
                     term.echo("Received " + data.type + " message.");
                     console.log(data);
                 });
+            var sub;
 
             connection.start()
-                .then(() => term.echo("Connected to server."));
+                .then(() => 
+                {
+                    term.echo("Connected to server.")
+                });
     
             var funcs = {
                 help: function() {
