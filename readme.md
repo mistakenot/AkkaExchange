@@ -47,15 +47,15 @@ As far as the core objective of this project goes, it is more or less complete. 
 That aside, there are a few nice-to-dos that I would like to find time to tie up. Many of these are tied to the "Lessons Learnt" section.
 - [ ] Figure out what a [`ICommandHandler`](AkkaExchange/ICommandHandler.cs) should really look like. Is it appropriate to return errors here? Should you provide the new State alongside the Event?
 - [ ] Better improve the consistency charactistics of the system. There are currently many oppotunities to screw your state up.
-- [ ] Develop client to be a bit more mature and fully featured, showing charts for price, volume, order history etc.
+- [x] Develop client to be a bit more mature and fully featured, showing charts for price, volume, order history etc.
 - [ ] Rewrite core domain code in pure F#. (See below.)
 - [ ] Connect it to a database for persistent sessions. Maybe also add auth for web clients.
-- [ ] Tidy up stream implementations; get rid of hacky internal Observable/Subject code and use the Akka.NET native `ISubscriber` and `IPublisher` interfaces. 
+- [x] Tidy up stream implementations; get rid of hacky internal Observable/Subject code and use the Akka.NET native `ISubscriber` and `IPublisher` interfaces. 
 - [ ] Better error handling for failed order execution. In fact, better error handling everywhere.
 
 # Lessons Learnt
 ## Functional Programming
-The style of coding that you end up getting pushed towards would look quite strange to someone who has only ever done Object-Orientated Programming. One set of examples are the classes that implement [`IState`](AkkaExchange/IState.cs). Here's an example from the [`ClientState`](AkkaExchange/Client/ClientState.cs) class:
+The style of coding that you end up getting pushed towards would look quite strange if you're mostly used to Object-Orientated Programming. One set of examples are the classes that implement [`IState`](AkkaExchange/IState.cs). Here's an example from the [`ClientState`](AkkaExchange/Client/ClientState.cs) class:
 ````
 public class ClientState : Message, IState<ClientState>
 {
@@ -173,5 +173,4 @@ Although I'm new to all this stuff, I am starting to recognise the advantages to
 - Messaging and CQRS are resiliant by default. You write code in such a way that your components don't wait for responses from their collaborators. This is known as "Tell don't ask". It forces the programmer to think explicitly about what happens when components fail to communicate with each other. It makes it less likely that a poorly implemented method will bubble a `NullReferenceException` all the way up the stack and blow the process up. The trade off is that it is sometimes difficult to tell exactly what is going on in the system. The only way to offset this is to implement good logging and great testing. It forces you to be a better programmer.
 - I'm not going to use this for every CRUD app I ever build. There are a lot of concepts to learn and plumbing to grind through. But this approach would be my go-to if I was ever tasked with building something complex or important enough that a large amount of money or lives depended it. I'd recommend that you don't employ me to do this anytime soon.
 
-That's all folks!
 [@jazzyskeltor](https://twitter.com/jazzyskeltor)
