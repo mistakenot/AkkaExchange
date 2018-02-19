@@ -35,7 +35,7 @@ namespace AkkaExchange.Client.Queries
             string clientManagerPersistenceId,
             IEventsByPersistenceIdQuery eventsByPersistenceIdQuery,
             IMaterializer materializer,
-            Source<HandlerErrorEvent, Akka.NotUsed> errorSource)
+            IObservable<HandlerErrorEvent> handlerErrorEvents)
         {
             var clientManagerStateSource = eventsByPersistenceIdQuery
                 .EventsByPersistenceId(clientManagerPersistenceId, 0L, long.MaxValue)
@@ -58,15 +58,8 @@ namespace AkkaExchange.Client.Queries
             };
 
             Func<Guid, IObservable<HandlerResult>> clientErrorFactory = (Guid g) =>
-            {
-                var source = errorSource
-                    .Where(e => e.Name == g.ToString())
-                    .Select(e => e.Result);
-
-                return new SourceObservable<HandlerResult>(
-                    source,
-                    materializer);
-            };
+                handlerErrorEvents.Where(e => e.Name == g.ToString()).Select(e => e.Result);
+            
 
             return new ClientQueries(
                 clientManagerStateObservable,

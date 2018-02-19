@@ -43,17 +43,16 @@ namespace AkkaExchange
                 Thread.Sleep(500);
 
                 var client = exchange.NewConnection().Result;
-                var clientSubscription = client.Events.Subscribe(e =>
-                {
-                    Console.WriteLine($"Client has received event: {e}");
-                });
+
+                client.Events.Subscribe(e => Console.WriteLine($"Client event: {e}"));
+                client.Errors.Subscribe(e => Console.WriteLine($"Client error: {e}"));
+                client.State.Subscribe(e => Console.WriteLine($"Client state: {e}"));
 
                 client.NewOrder(1m, 1m, OrderSide.Ask);
                 client.NewOrder(1m, 1m, OrderSide.Bid);
+                client.NewOrder(100000m, 100000m, OrderSide.Bid);
 
                 Console.ReadLine();
-
-                clientSubscription.Dispose();
             }
 
         }
