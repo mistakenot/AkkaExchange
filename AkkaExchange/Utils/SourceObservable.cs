@@ -20,12 +20,12 @@ namespace AkkaExchange.Utils
         public IDisposable Subscribe(IObserver<T> observer)
         {
             var subscriber = new ObserverSubscriber<T>(observer);
-            var thing =  _source
+            var none = _source
                 .ToMaterialized(
                     Sink.FromSubscriber<T>(subscriber), 
                     Keep.None)
                 .Run(_materializer);
-                
+
             return subscriber;
         }
     }
