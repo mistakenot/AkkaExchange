@@ -35,8 +35,8 @@ namespace AkkaExchange
                     Console.WriteLine($"Open: {s.OpenOrders.Count}, Executing: {s.ExecutingOrders.Count}, Complete: {s.CompleteOrders.Count}."));
                 var orderBookEvents = exchange.Queries.Orders.OrderBookEvents.Subscribe(e =>
                     Console.WriteLine($"OrderBookEvent: {e.GetType().FullName}"));
-                var errorSubscription = exchange.Queries.HandlerErrorEvents.Subscribe(e => 
-                    Console.WriteLine($"Error: {e.ToString()}"));
+                // var errorSubscription = exchange.Queries.HandlerErrorEvents.Subscribe(e => 
+                //     Console.WriteLine($"Error: {e.ToString()}"));
                 var orderCompleteSubscription = exchange.Queries.Orders.OrderBookState.CompleteOrders().Subscribe(orders => 
                     Console.WriteLine($"CompleteOrders: {orders.Count()}"));
 

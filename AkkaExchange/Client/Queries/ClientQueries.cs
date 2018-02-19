@@ -12,24 +12,24 @@ namespace AkkaExchange.Client.Queries
     {
         public IObservable<ClientManagerState> ClientManagerState { get; }
 
-        private readonly Func<Guid, IObservable<HandlerResult>> _clientErrorFactory;
-        private readonly Func<Guid, IObservable<IEvent>> _clientEventFactory;
-        private readonly Func<Guid, IObservable<ClientState>> _clientStateFactory;
+        private readonly Func<string, IObservable<HandlerResult>> _clientErrorFactory;
+        private readonly Func<string, IObservable<IEvent>> _clientEventFactory;
+        private readonly Func<string, IObservable<ClientState>> _clientStateFactory;
 
         public ClientQueries(
             IObservable<ClientManagerState> clientManagerState,
-            Func<Guid, IObservable<HandlerResult>> clientErrorFactory,
-            Func<Guid, IObservable<IEvent>> clientEventFactory)
+            Func<string, IObservable<HandlerResult>> clientErrorFactory,
+            Func<string, IObservable<IEvent>> clientEventFactory)
         {
             ClientManagerState = clientManagerState ?? throw new ArgumentNullException(nameof(clientManagerState));
             _clientErrorFactory = clientErrorFactory ?? throw new ArgumentNullException(nameof(clientErrorFactory));
             _clientEventFactory = clientEventFactory ?? throw new ArgumentNullException(nameof(clientEventFactory));
         }
 
-        public IObservable<HandlerResult> Errors(Guid clientId) => _clientErrorFactory(clientId);
-        public IObservable<IEvent> Events(Guid clientId) => _clientEventFactory(clientId);
-        public IObservable<ClientState> State(Guid clientId) => 
-            Events(clientId).Scan(ClientState.Empty, (s, e) => s.Update(e));
+        public IObservable<HandlerResult> Errors(string persistenceId) => _clientErrorFactory(persistenceId);
+        public IObservable<IEvent> Events(string persistenceId) => _clientEventFactory(persistenceId);
+        public IObservable<ClientState> State(string persistenceId) => 
+            Events(persistenceId).Scan(ClientState.Empty, (s, e) => s.Update(e));
 
         public static ClientQueries Create(
             string clientManagerPersistenceId,
@@ -47,18 +47,18 @@ namespace AkkaExchange.Client.Queries
                 clientManagerStateSource,
                 materializer);
 
-            Func<Guid, IObservable<IEvent>> clientEventFactory = (Guid g) => 
+            Func<string, IObservable<IEvent>> clientEventFactory = (string id) => 
             {
                 var source = eventsByPersistenceIdQuery
-                    .EventsByPersistenceId(g.ToString(), 0L, long.MaxValue)
+                    .EventsByPersistenceId(id.ToString(), 0L, long.MaxValue)
                     .Where(e => e.Event is IEvent)
                     .Select(e => e.Event as IEvent);
                 
                 return new SourceObservable<IEvent>(source, materializer);
             };
 
-            Func<Guid, IObservable<HandlerResult>> clientErrorFactory = (Guid g) =>
-                handlerErrorEvents.Where(e => e.Name == g.ToString()).Select(e => e.Result);
+            Func<string, IObservable<HandlerResult>> clientErrorFactory = (string id) =>
+                handlerErrorEvents.Where(e => e.Name == id.ToString()).Select(e => e.Result);
             
 
             return new ClientQueries(

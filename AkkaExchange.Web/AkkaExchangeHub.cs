@@ -40,7 +40,7 @@ namespace AkkaExchange.Web
                 .Merge(
                     client.Errors.Cast<Message>())
                 .Merge(
-                    _akkaExchange.Queries.ClientManagerState.NumberOfConnectedClientsQuery().Cast<Message>())
+                    _akkaExchange.Queries.Clients.ClientManagerState.NumberOfConnectedClientsQuery().Cast<Message>())
                 .Merge(
                     _akkaExchange.Queries.Orders.OrderBookState.Cast<Message>());
             

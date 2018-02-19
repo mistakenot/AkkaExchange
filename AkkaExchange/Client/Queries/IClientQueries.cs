@@ -7,8 +7,8 @@ namespace AkkaExchange.Client.Queries
     {
          IObservable<ClientManagerState> ClientManagerState { get; }
 
-         IObservable<IEvent> Events(Guid clientId);
-         IObservable<ClientState> State(Guid clientId);
-         IObservable<HandlerResult> Errors(Guid clientId);
+         IObservable<IEvent> Events(string persistenceId);
+         IObservable<ClientState> State(string persistenceId);
+         IObservable<HandlerResult> Errors(string persistenceId);
     }
 }

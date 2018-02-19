@@ -17,14 +17,6 @@ using AkkaExchange.Utils;
 
 namespace AkkaExchange
 {
-    public interface IAkkaExchangeQueries
-    {
-        IOrderQueries Orders { get; }
-        IClientQueries Clients { get; }
-        IObservable<HandlerErrorEvent> HandlerErrorEvents { get; }
-        
-    }
-    
     public class AkkaExchangeQueries : IAkkaExchangeQueries
     {
         public IOrderQueries Orders { get; }
@@ -56,9 +48,6 @@ namespace AkkaExchange
                     Sink.FromSubscriber(handlerErrorSubscriber),
                     Keep.Left)
                 .Run(materializer);
-
-            // var handlerErrorFactory = new HandlerErrorQueryFactory(materializer);
-            // var (handlerErrorObservable, handlerErrorSource) = handlerErrorFactory.Create();
 
             var orderQueries = OrderQueries.Create(
                 "order-book",

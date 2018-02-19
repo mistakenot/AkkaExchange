@@ -29,14 +29,9 @@ namespace AkkaExchange
         public IAkkaExchangeQueries Queries { get; }
 
         private readonly ActorSystem _system;
-
-        public ILogger<AkkaExchange> _logger { get; }
-
+        private readonly ILogger<AkkaExchange> _logger;
         private readonly IActorRef _clientManager;
         private readonly IActorRef _orderBook;
-        private Task _source;
-        private readonly IEventsQueryFactory _eventsQueryFactory;
-        private readonly StateQueryFactory<ClientState> _clientStateQueryFactory;
         private readonly IActorRef _orderExecutorManager;
         private readonly IDisposable _errorStreamLoggerSubscription;
 
@@ -60,17 +55,14 @@ namespace AkkaExchange
                 readJournal);
 
             globalActorRefs.ErrorEventSubscriber = queries.HandlerErrorEventsSource;
+            
+            _system.AddDependencyResolver(
+                new AutoFacDependencyResolver(container.Build(), _system));
+            
             Queries = queries;
 
             _errorStreamLoggerSubscription = Queries.HandlerErrorEvents.Subscribe(e =>
                 _logger.LogInformation(e.ToString()));
-
-            _system.AddDependencyResolver(
-                new AutoFacDependencyResolver(container.Build(), _system));
-
-            _clientStateQueryFactory = new StateQueryFactory<ClientState>(readJournal, materializer, ClientState.Empty);
-
-            _source = readJournal.PersistenceIds().RunForeach(Console.WriteLine, materializer);
             
             _clientManager = _system.ActorOf(
                 _system.DI().Props<ClientManagerActor>(), 
@@ -96,8 +88,6 @@ namespace AkkaExchange
                     _orderBook,
                     new MatchOrdersCommand(),
                     ActorRefs.NoSender);
-
-            _eventsQueryFactory = new EventsQueryFactory(readJournal, materializer);
         }
         public void Dispose()
         {
@@ -114,12 +104,9 @@ namespace AkkaExchange
             _clientManager.Tell(command, inbox.Receiver);
 
             var clientActor = await inbox.ReceiveAsync();
-            var eventsQuery = _eventsQueryFactory.Create(persistenceId);
-            var stateQuery = _clientStateQueryFactory.Create(persistenceId);
-            var errorQuery = Queries
-                .HandlerErrorEvents
-                .Where(e => e.Name == persistenceId)
-                .Select(e => e.Result);
+            var eventsQuery = Queries.Clients.Events(persistenceId);
+            var stateQuery = Queries.Clients.State(persistenceId);
+            var errorQuery = Queries.Clients.Errors(persistenceId);
 
             _logger.LogInformation($"Created new client {persistenceId}");
             
