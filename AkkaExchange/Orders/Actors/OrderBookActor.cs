@@ -31,15 +31,13 @@ namespace AkkaExchange.Orders.Actors
 
         protected override void OnCommand(object message)
         {
-            if (message is MatchOrdersCommand && State.OpenOrders.Count == 0)
+            if (!(message is MatchOrdersCommand && State.OpenOrders.Count == 0))
             {
-                // Hack to stop us filling up the db with null events.
-            }
-            else
-            {
-                OnCommand(message);
+                // TODO Hack to stop us filling the db with null events.
+                base.OnCommand(message);
             }
         }
+
         protected override void OnPersist(IEvent persistedEvent)
         {
             if (persistedEvent is MatchedOrdersEvent matchedOrdersEvent)
