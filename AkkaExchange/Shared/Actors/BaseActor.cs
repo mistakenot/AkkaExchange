@@ -10,6 +10,8 @@ namespace AkkaExchange.Shared.Actors
     {
         public override string PersistenceId { get; }
 
+        protected TState State { get; private set; }
+
         public BaseActor(
             ICommandHandler<TState> handler,
             IGlobalActorRefs globalActorRefs,
@@ -20,18 +22,17 @@ namespace AkkaExchange.Shared.Actors
 
             _handler = handler ?? throw new ArgumentNullException(nameof(handler));
             _globalActorRefs = globalActorRefs;
-            _state = defaultState ?? throw new ArgumentNullException(nameof(defaultState));
+            State = defaultState ?? throw new ArgumentNullException(nameof(defaultState));
         }
 
         private readonly ICommandHandler<TState> _handler;
         private readonly IGlobalActorRefs _globalActorRefs;
-        private TState _state;
 
         protected override void OnCommand(object message)
         {
             if (message is ICommand command)
             {
-                var handlerResult = _handler.Handle(_state, command);
+                var handlerResult = _handler.Handle(State, command);
 
                 if (handlerResult.Success)
                 {
@@ -53,7 +54,7 @@ namespace AkkaExchange.Shared.Actors
         {
             if (persistedEvent is IEvent evnt)
             {
-                _state = _state.Update(evnt);
+                State = State.Update(evnt);
             }
             
             if (persistedEvent is RecoveryCompleted)
@@ -69,7 +70,7 @@ namespace AkkaExchange.Shared.Actors
 
         protected virtual void OnPersist(IEvent persistedEvent)
         {
-            _state = _state.Update(persistedEvent);
+            State = State.Update(persistedEvent);
         }
     }
 }

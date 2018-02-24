@@ -1,6 +1,7 @@
 ﻿using System;
 using Akka.Actor;
 using AkkaExchange.Execution.Commands;
+using AkkaExchange.Orders.Commands;
 using AkkaExchange.Orders.Events;
 using AkkaExchange.Shared.Actors;
 using AkkaExchange.Utils;
@@ -28,6 +29,17 @@ namespace AkkaExchange.Orders.Actors
             _clientManager = globalActorRefs?.ClientManager ?? throw new ArgumentNullException(nameof(globalActorRefs));
         }
 
+        protected override void OnCommand(object message)
+        {
+            if (message is MatchOrdersCommand)
+            {
+                // Hack to stop us filling up the db with null events.
+            }
+            else
+            {
+                OnCommand(message);
+            }
+        }
         protected override void OnPersist(IEvent persistedEvent)
         {
             if (persistedEvent is MatchedOrdersEvent matchedOrdersEvent)
