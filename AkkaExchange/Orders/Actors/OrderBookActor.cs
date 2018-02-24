@@ -31,7 +31,7 @@ namespace AkkaExchange.Orders.Actors
 
         protected override void OnCommand(object message)
         {
-            if (message is MatchOrdersCommand)
+            if (message is MatchOrdersCommand && State.OpenOrders.Count == 0)
             {
                 // Hack to stop us filling up the db with null events.
             }
