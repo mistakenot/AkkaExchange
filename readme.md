@@ -1,6 +1,9 @@
 # AkkaExchange
 ## Event sourced commodity exchange 
-This is a learning project and as such certainly falls fowl of many good software principles. The primary aims are to learn about:
+
+[Live demo](http://akkaexchange.herokuapp.com/) (Might take a few seconds to load. Supports multiple concurrent users.)
+
+This is a learning project. The primary aims are to learn about:
 - Event Sourcing
 - CQRS
 - Akka.NET Persistence & Streaming
@@ -171,6 +174,6 @@ Although I'm new to all this stuff, I am starting to recognise the advantages to
 - Event Sourcing is "lossless". You persist the events that create your state rather than the state itself. This makes it easy to see a complete audit trail of everything that has happened in your system. It's no surprise that most critical systems like databases and financial ledgers use this approach. To paraphrase Greg Young:
 > Do you think that your bank balance is a value or a calculation?
 - Messaging and CQRS are resiliant by default. You write code in such a way that your components don't wait for responses from their collaborators. This is known as "Tell don't ask". It forces the programmer to think explicitly about what happens when components fail to communicate with each other. It makes it less likely that a poorly implemented method will bubble a `NullReferenceException` all the way up the stack and blow the process up. The trade off is that it is sometimes difficult to tell exactly what is going on in the system. The only way to offset this is to implement good logging and great testing. It forces you to be a better programmer.
-- I'm not going to use this for every CRUD app I ever build. There are a lot of concepts to learn and plumbing to grind through. But this approach would be my go-to if I was ever tasked with building something complex or important enough that a large amount of money or lives depended it. I'd recommend that you don't employ me to do this anytime soon.
+- I'm not going to use this for every CRUD app I ever build. There are a lot of concepts to learn and plumbing to grind through. But this approach would be my go-to if I was ever tasked with building something complex or important enough that a large amount of money or lives depended it.
 
-[@jazzyskeltor](https://twitter.com/jazzyskeltor)
+[@thisischarlied](https://twitter.com/thisischarlied)
